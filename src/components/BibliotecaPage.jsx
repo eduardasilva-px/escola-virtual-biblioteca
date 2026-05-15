@@ -467,7 +467,7 @@ export default function BibliotecaPage() {
                  No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}
             <div
               className="sticky top-0 z-[20] bg-white relative w-full"
-              style={{ padding: '24px 24px 0' }}
+              style={{ padding: '24px 24px 8px' }}
             >
               <SearchBar
                 query={query}
