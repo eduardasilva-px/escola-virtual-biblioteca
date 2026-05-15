@@ -467,7 +467,7 @@ export default function BibliotecaPage() {
                  No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}
             <div
               className="sticky top-0 z-[20] bg-white relative w-full"
-              style={{ padding: '24px 24px 8px' }}
+              style={{ padding: '24px 24px 20px' }}
             >
               <SearchBar
                 query={query}
@@ -504,7 +504,7 @@ export default function BibliotecaPage() {
               )}
             </div>
 
-            <div className="flex flex-col gap-6 items-start px-6 pt-5 pb-6 w-full">
+            <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
 
               {hasActiveFilters ? (
                 /* ── Filtered view — all matching books in one unified grid, same size ── */
