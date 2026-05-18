@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import {
   Home,
   ClipboardList,
@@ -9,42 +10,46 @@ import {
   Store,
   Bell,
   ChevronDown,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react'
-import EscolaVirtualLogo from './EscolaVirtualLogo'
+import EscolaVirtualLogo, { EscolaVirtualMark } from './EscolaVirtualLogo'
 import IconBiblioteca from './IconBiblioteca'
 import IconEvia from './IconEvia'
 
 const NAV_MAIN = [
   { icon: Home,           label: 'Meu Espaço',  active: false },
   { icon: IconBiblioteca, label: 'Biblioteca',  active: true  },
-  { icon: ClipboardList, label: 'Avaliação',   active: false },
-  { icon: BookMarked,    label: 'Disciplinas', active: false },
-  { icon: Users,         label: 'Turmas',      active: false },
+  { icon: ClipboardList,  label: 'Avaliação',   active: false },
+  { icon: BookMarked,     label: 'Disciplinas', active: false },
+  { icon: Users,          label: 'Turmas',      active: false },
 ]
 
 const NAV_EXPLORE = [
   { icon: Shapes,   label: 'Recursos'    },
   { icon: Folders,  label: 'Projetos'    },
   { icon: BookA,    label: 'Dicionários' },
-  { icon: IconEvia,  label: 'EVIA'        },
+  { icon: IconEvia, label: 'EVIA'        },
 ]
 
 const NAV_BOTTOM = [
-  { icon: Store, label: 'Loja'          },
-  { icon: Bell,  label: 'Notificações'  },
+  { icon: Store, label: 'Loja'         },
+  { icon: Bell,  label: 'Notificações' },
 ]
 
-function SidebarItem({ icon: Icon, label, active = false }) {
+function SidebarItem({ icon: Icon, label, active = false, collapsed = false }) {
   return (
     <button
       className={[
-        'relative flex w-full items-center gap-2 rounded-md px-2 py-2 h-8 text-left',
+        'relative flex w-full items-center rounded-md py-2 h-8 text-left',
         'transition-colors duration-150',
+        collapsed ? 'justify-center px-0' : 'gap-2 px-2',
         active
           ? 'bg-[#151d40] text-white'
           : 'text-white/90 hover:bg-white/10',
       ].join(' ')}
       aria-current={active ? 'page' : undefined}
+      title={collapsed ? label : undefined}
     >
       {/* Left-edge active indicator */}
       {active && (
@@ -59,32 +64,60 @@ function SidebarItem({ icon: Icon, label, active = false }) {
         aria-hidden="true"
         className="shrink-0"
       />
-      <span
-        className={[
-          'flex-1 min-w-0 truncate leading-none',
-          active
-            ? 'text-[12px] font-medium'
-            : 'text-[14px] font-normal',
-        ].join(' ')}
-      >
-        {label}
-      </span>
+      {!collapsed && (
+        <span
+          className={[
+            'flex-1 min-w-0 truncate leading-none',
+            active
+              ? 'text-[12px] font-medium'
+              : 'text-[14px] font-normal',
+          ].join(' ')}
+        >
+          {label}
+        </span>
+      )}
     </button>
   )
 }
 
 export default function Sidebar() {
+  const [isSmall, setIsSmall] = useState(() => window.innerWidth <= 1024)
+  const [collapsed, setCollapsed] = useState(true)
+
+  useEffect(() => {
+    function handleResize() {
+      setIsSmall(window.innerWidth <= 1024)
+      if (window.innerWidth > 1024) setCollapsed(false)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const isCollapsed = isSmall && collapsed
+
   return (
     <aside
-      className="relative flex flex-col shrink-0 w-[194px] h-full p-3 z-10"
-      style={{ background: 'var(--sidebar)' }}
+      className="relative flex flex-col shrink-0 h-full p-3 z-10"
+      style={{
+        background: 'var(--sidebar)',
+        width: isCollapsed ? 48 : 194,
+        transition: 'width 220ms cubic-bezier(0.16, 1, 0.3, 1)',
+        overflow: 'hidden',
+      }}
       aria-label="Navegação principal"
     >
       {/* ── Main content (grows to fill) ── */}
       <div className="flex flex-col flex-1 gap-4 min-h-0">
-        {/* Logo */}
-        <div className="flex flex-col gap-0 py-2 shrink-0">
-          <EscolaVirtualLogo />
+        {/* Logo + toggle */}
+        <div
+          className="flex items-center py-2 shrink-0"
+          style={{ justifyContent: isCollapsed ? 'center' : 'flex-start' }}
+        >
+          {isCollapsed ? (
+            <EscolaVirtualMark />
+          ) : (
+            <EscolaVirtualLogo />
+          )}
         </div>
 
         {/* Nav + Explore section */}
@@ -94,7 +127,7 @@ export default function Sidebar() {
             <ul className="flex flex-col gap-1 list-none">
               {NAV_MAIN.map((item) => (
                 <li key={item.label}>
-                  <SidebarItem {...item} />
+                  <SidebarItem {...item} collapsed={isCollapsed} />
                 </li>
               ))}
             </ul>
@@ -102,17 +135,19 @@ export default function Sidebar() {
 
           {/* Explore section */}
           <div className="flex flex-col shrink-0">
-            {/* Section header */}
-            <div className="flex h-8 items-center justify-between px-2 rounded-md w-[170px]">
-              <span className="flex-1 min-w-0 truncate text-[12px] font-semibold leading-4 text-[#cccccc] uppercase tracking-wide">
-                Explorar
-              </span>
-            </div>
+            {!isCollapsed && (
+              <div className="flex h-8 items-center px-2 rounded-md">
+                <span className="flex-1 min-w-0 truncate text-[12px] font-semibold leading-4 text-[#cccccc] uppercase tracking-wide">
+                  Explorar
+                </span>
+              </div>
+            )}
+            {isCollapsed && <div className="h-8" />}
             <nav aria-label="Explorar">
               <ul className="flex flex-col gap-1 list-none">
                 {NAV_EXPLORE.map((item) => (
                   <li key={item.label}>
-                    <SidebarItem {...item} />
+                    <SidebarItem {...item} collapsed={isCollapsed} />
                   </li>
                 ))}
               </ul>
@@ -127,7 +162,7 @@ export default function Sidebar() {
           <ul className="flex flex-col gap-1 list-none">
             {NAV_BOTTOM.map((item) => (
               <li key={item.label}>
-                <SidebarItem {...item} />
+                <SidebarItem {...item} collapsed={isCollapsed} />
               </li>
             ))}
           </ul>
@@ -137,14 +172,17 @@ export default function Sidebar() {
         <hr className="border-t border-[#3a4688]" />
 
         {/* User profile */}
-        <button className="flex w-full items-center gap-2 px-2 py-2 rounded-md hover:bg-white/10 transition-colors duration-150">
+        <button
+          className="flex w-full items-center gap-2 px-2 py-2 rounded-md hover:bg-white/10 transition-colors duration-150"
+          style={{ justifyContent: isCollapsed ? 'center' : undefined }}
+          title={isCollapsed ? 'Carolina Reis' : undefined}
+        >
           {/* Avatar */}
           <div
             className="shrink-0 size-8 rounded-full overflow-hidden flex items-center justify-center relative"
             style={{ background: '#eff6ff' }}
             aria-hidden="true"
           >
-            {/* Decorative bg tilt */}
             <div
               className="absolute inset-0 opacity-25"
               style={{
@@ -157,17 +195,33 @@ export default function Sidebar() {
             </span>
           </div>
 
-          {/* Name */}
-          <div className="flex flex-col flex-1 min-w-0 gap-0.5 justify-center">
-            <p className="truncate text-[12px] font-medium leading-none text-white">
-              Carolina Reis
-            </p>
-          </div>
-
-          {/* Chevron */}
-          <ChevronDown size={16} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-white/70" />
+          {!isCollapsed && (
+            <>
+              <div className="flex flex-col flex-1 min-w-0 gap-0.5 justify-center">
+                <p className="truncate text-[12px] font-medium leading-none text-white">
+                  Carolina Reis
+                </p>
+              </div>
+              <ChevronDown size={16} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-white/70" />
+            </>
+          )}
         </button>
       </div>
+
+      {/* ── Toggle button (only at ≤1024px) ── */}
+      {isSmall && (
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? 'Expandir menu' : 'Colapsar menu'}
+          className="absolute top-[52px] right-0 translate-x-1/2 flex items-center justify-center size-5 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors duration-150 z-20"
+          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.22)' }}
+        >
+          {collapsed
+            ? <ChevronRight size={12} strokeWidth={2} className="text-[#080c10]" />
+            : <ChevronLeft  size={12} strokeWidth={2} className="text-[#080c10]" />
+          }
+        </button>
+      )}
     </aside>
   )
 }

@@ -52,9 +52,8 @@ export default function SearchOverlay({
       role="dialog"
       aria-modal="true"
       aria-label="Catálogo de manuais"
-      className={`flex flex-col overflow-hidden rounded-[14px] ${isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}`}
+      className={`flex flex-col overflow-hidden rounded-[14px] h-full ${isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}`}
       style={{
-        height: '567px',
         background: 'var(--background)',
         border: '1px solid #e5e5e5',
         boxShadow:

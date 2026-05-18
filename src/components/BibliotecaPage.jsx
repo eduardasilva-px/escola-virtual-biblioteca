@@ -230,6 +230,8 @@ export default function BibliotecaPage() {
   )
 
   const searchInputRef = useRef(null)
+  const stickyRowRef   = useRef(null)
+  const searchBarRef   = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -258,6 +260,36 @@ export default function BibliotecaPage() {
   useEffect(() => {
     if (isOverlayOpen) setOpenCount((c) => c + 1)
   }, [isOverlayOpen])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Overlay fixed position: measure sticky row on open + on resize ── */
+  const [overlayFixedStyle, setOverlayFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
+  useEffect(() => {
+    function compute() {
+      if (!searchBarRef.current) return
+      const rect        = searchBarRef.current.getBoundingClientRect()
+      const mainEl      = document.querySelector('main')
+      const containerEl = mainEl?.closest('[class*="rounded-\\[16px\\]"]') ?? mainEl
+      const mainRight   = mainEl ? mainEl.getBoundingClientRect().right : window.innerWidth
+      const containerBottom = containerEl
+        ? containerEl.getBoundingClientRect().bottom
+        : window.innerHeight
+      setOverlayFixedStyle({
+        position: 'fixed',
+        top:    rect.bottom + 8,
+        left:   rect.left,
+        right:  window.innerWidth - mainRight + 24,
+        bottom: window.innerHeight - containerBottom + 24,
+        zIndex: 15,
+      })
+    }
+    if (overlayMounted) {
+      compute()
+      window.addEventListener('resize', compute)
+      return () => window.removeEventListener('resize', compute)
+    } else {
+      setOverlayFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
+    }
+  }, [overlayMounted])
 
   /* ── Debounce: update `debouncedQuery` 250 ms after the user stops typing ── */
   useEffect(() => {
@@ -431,7 +463,7 @@ export default function BibliotecaPage() {
           }}
         >
           {/* Floating "Ferramentas" button — z-[25] keeps it above the overlay */}
-          <div className="absolute bottom-2 right-2 z-[25]">
+          <div className="absolute bottom-6 right-6 z-[25]">
             <FloatingButton />
           </div>
 
@@ -466,6 +498,7 @@ export default function BibliotecaPage() {
             {/* ── Sticky search + filter row — sticks to top of main after banner scrolls away.
                  No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}
             <div
+              ref={stickyRowRef}
               className="sticky top-0 z-[20] bg-white relative w-full"
               style={{ padding: '24px 24px 20px' }}
             >
@@ -474,6 +507,7 @@ export default function BibliotecaPage() {
                 onQueryChange={setQuery}
                 onClear={clearSearch}
                 inputRef={searchInputRef}
+                containerRef={searchBarRef}
                 isOpen={isOverlayOpen}
                 filters={filters}
                 onFilterToggle={handleFilterToggle}
@@ -486,10 +520,7 @@ export default function BibliotecaPage() {
                    top: calc(100% + 8px) = 60 px (row height) + 8 px gap = 68 px,
                    which maps to the same visual position as the old top: 156 px / 120 px. ── */}
               {overlayMounted && (
-                <div
-                  className={`absolute left-6 right-6 z-[15]`}
-                  style={{ top: 'calc(100% + 8px)' }}
-                >
+                <div style={overlayFixedStyle}>
                   <SearchOverlay
                     query={debouncedQuery}
                     rawQuery={query}
@@ -515,8 +546,8 @@ export default function BibliotecaPage() {
                     />
                   ) : (
                     <div
-                      className="grid gap-4 w-full items-end"
-                      style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+                      className="grid w-full items-end"
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {[...visiblePinnedBooks, ...visibleGridBooks].map((book) => (
                         <BookCard
@@ -552,11 +583,11 @@ export default function BibliotecaPage() {
                     </div>
                   </section>
 
-                  {/* ── All books grid — 6 equal columns, bottom-aligned ── */}
+                  {/* ── All books grid — responsive 6–8 columns, bottom-aligned ── */}
                   <section aria-label="Todos os manuais" className="w-full">
                     <div
-                      className="grid gap-4 w-full items-end"
-                      style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}
+                      className="grid w-full items-end"
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {visibleGridBooks.map((book) => (
                         <BookCard

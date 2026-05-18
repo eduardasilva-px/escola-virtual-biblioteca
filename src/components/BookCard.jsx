@@ -98,8 +98,8 @@ export default function BookCard({
             'absolute top-1 right-1',
             'flex items-center justify-center p-1.5 rounded-full w-7 h-7',
             'backdrop-blur-[6px] shadow-[0px_1px_3px_0px_rgba(8,13,22,0.2)]',
-            'transition-opacity duration-150',
-            pinned ? 'bg-white/90' : 'bg-white/80',
+            'transition-[background-color,opacity] duration-150',
+            pinned ? 'bg-white/90 hover:bg-white' : 'bg-white/80 hover:bg-white',
           ].join(' ')}
         >
           <Pin
@@ -120,8 +120,8 @@ export default function BookCard({
           onClick={handleMenuButtonClick}
           className={[
             'absolute top-9 right-1 flex items-center justify-center p-1.5 rounded-full w-7 h-7',
-            'backdrop-blur-[6px] bg-white/80 shadow-[0px_1px_3px_0px_rgba(8,13,22,0.2)]',
-            'transition-opacity duration-150',
+            'backdrop-blur-[6px] bg-white/80 hover:bg-white shadow-[0px_1px_3px_0px_rgba(8,13,22,0.2)]',
+            'transition-[background-color,opacity] duration-150',
           ].join(' ')}
         >
           <MoreVertical size={14} className="text-[#535353]" strokeWidth={1.75} aria-hidden="true" />

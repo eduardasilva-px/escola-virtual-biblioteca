@@ -136,8 +136,8 @@ export default function FilterButton({
           size={16}
           strokeWidth={1.75}
           aria-hidden="true"
-          className="shrink-0 transition-transform duration-150"
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          className="shrink-0"
+          style={{ transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)' }}
         />
       </button>
 

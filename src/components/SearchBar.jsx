@@ -23,6 +23,7 @@ export default function SearchBar({
   onQueryChange,
   onClear,
   inputRef,
+  containerRef,
   isOpen = false,
   filters = [],
   onFilterToggle,
@@ -34,7 +35,7 @@ export default function SearchBar({
   const isActive = isFocused || isOpen
 
   return (
-    <div className="relative shrink-0 w-full">
+    <div ref={containerRef} className="relative shrink-0 w-full">
       <div className="flex gap-3 items-center w-full">
 
         {/* Search input — fixed width so the sort button never shifts */}
