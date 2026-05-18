@@ -499,7 +499,7 @@ export default function BibliotecaPage() {
                  No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}
             <div
               ref={stickyRowRef}
-              className="sticky top-0 z-[20] bg-white relative w-full"
+              className={`sticky top-0 z-[20] relative w-full ${isOverlayOpen ? '' : 'bg-white'}`}
               style={{ padding: '24px 24px 20px' }}
             >
               <SearchBar
