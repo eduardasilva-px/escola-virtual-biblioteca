@@ -240,6 +240,7 @@ export default function BibliotecaPage() {
   const stickyRowRef   = useRef(null)
   const searchBarRef   = useRef(null)
   const mainRef        = useRef(null)
+  const containerRef   = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -279,20 +280,30 @@ export default function BibliotecaPage() {
     )
   }, [debouncedQuery])
 
-  /* ── Overlay fixed position: covers the main content area with 8 px margin ── */
-  const [overlayFixedStyle, setOverlayFixedStyle] = useState({
-    position: 'fixed', top: -9999, visibility: 'hidden',
-  })
+  /* ── Overlay + backdrop fixed positions ── */
+  const [backdropFixedStyle, setBackdropFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
+  const [overlayFixedStyle,  setOverlayFixedStyle]  = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
   useEffect(() => {
     function compute() {
-      if (!mainRef.current) return
-      const rect = mainRef.current.getBoundingClientRect()
+      if (!mainRef.current || !containerRef.current) return
+      const mainRect      = mainRef.current.getBoundingClientRect()
+      const containerRect = containerRef.current.getBoundingClientRect()
+      setBackdropFixedStyle({
+        position:     'fixed',
+        top:          containerRect.top,
+        left:         containerRect.left,
+        right:        window.innerWidth  - containerRect.right,
+        bottom:       window.innerHeight - containerRect.bottom,
+        borderRadius: '16px',
+        background:   'rgba(0,0,0,0.2)',
+        zIndex:       49,
+      })
       setOverlayFixedStyle({
         position: 'fixed',
-        top:    rect.top    + 8,
-        left:   rect.left   + 8,
-        right:  window.innerWidth  - rect.right  + 8,
-        bottom: window.innerHeight - rect.bottom + 8,
+        top:    mainRect.top    + 8,
+        left:   mainRect.left   + 8,
+        right:  window.innerWidth  - mainRect.right  + 8,
+        bottom: window.innerHeight - mainRect.bottom + 8,
         zIndex: 50,
       })
     }
@@ -301,6 +312,7 @@ export default function BibliotecaPage() {
       window.addEventListener('resize', compute)
       return () => window.removeEventListener('resize', compute)
     } else {
+      setBackdropFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
       setOverlayFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
     }
   }, [overlayMounted])
@@ -470,6 +482,7 @@ export default function BibliotecaPage() {
 
         {/* ── White rounded container ── */}
         <div
+          ref={containerRef}
           className="relative flex flex-col isolate overflow-hidden rounded-[16px] w-full h-full"
           style={{
             background: 'var(--background)',
@@ -602,6 +615,14 @@ export default function BibliotecaPage() {
          Contains the expanded search bar + scrollable catalogue results.
     ─────────────────────────────────────────────────────────────────────── */}
     {overlayMounted && createPortal(
+      <>
+      {/* Backdrop — covers the full white container */}
+      <div
+        style={backdropFixedStyle}
+        className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
+      />
+
+      {/* Floating results container */}
       <div
         style={overlayFixedStyle}
         className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
@@ -678,7 +699,8 @@ export default function BibliotecaPage() {
             }}
           />
         </div>
-      </div>,
+      </div>
+      </>,
       document.body,
     )}
 
