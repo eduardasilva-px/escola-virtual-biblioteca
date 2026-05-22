@@ -28,6 +28,7 @@ export default function FilterButton({
   onToggle,
   sortConfig,
   align = 'left',
+  showSearch = true,
 }) {
   const [isOpen,          setIsOpen]          = useState(false)
   const [dropdownMounted, setDropdownMounted] = useState(false)
@@ -164,6 +165,7 @@ export default function FilterButton({
               items={items}
               selectedItems={selectedItems}
               onToggle={onToggle}
+              showSearch={showSearch}
             />
           )}
         </div>,

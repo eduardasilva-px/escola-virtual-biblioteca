@@ -64,12 +64,12 @@ export default function BookCard({
 
   return (
     <article
-      className="flex flex-col gap-2 items-start shrink-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-1.5"
+      className="flex flex-col gap-2 items-start shrink-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer"
       style={width ? { width } : undefined}
     >
       {/* ── Cover image container — height driven by natural image dimensions ── */}
       <div
-        className="relative rounded-[4px] w-full group"
+        className="relative rounded-[4px] w-full group transition-transform duration-200 ease-out hover:-translate-y-1.5"
         style={{ boxShadow: 'var(--shadow-card-cover)' }}
       >
         {/* Natural-ratio cover — block + w-full so the div sizes to the image */}
@@ -88,6 +88,9 @@ export default function BookCard({
               'linear-gradient(270deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 91.5%, rgba(0,0,0,0.1) 94.1%, rgba(255,255,255,0.16) 94.5%, rgba(0,0,0,0.06) 95.3%, rgba(0,0,0,0.04) 97.4%, rgba(255,255,255,0) 100%)',
           }}
         />
+
+        {/* Hover highlight */}
+        <div className="absolute inset-0 rounded-[4px] pointer-events-none bg-white/0 group-hover:bg-white/15 transition-colors duration-200" />
 
         {/* ── Action buttons ── */}
         {/* Pin — top-right */}

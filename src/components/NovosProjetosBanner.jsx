@@ -10,7 +10,7 @@ import { ArrowRight } from 'lucide-react'
 function BookCover({ src, rotation, zIndex }) {
   return (
     <div
-      className="relative shrink-0 w-[143px] cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-2 group"
+      className="relative shrink-0 w-[165px] cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-2 group"
       style={{ marginRight: '-15px', zIndex }}
     >
       <div style={{ transform: `rotate(${rotation}deg)` }}>
@@ -53,7 +53,7 @@ function BookCover({ src, rotation, zIndex }) {
 export default function NovosProjetosBanner({ onVerTodos }) {
   return (
     <div
-      className="relative w-full rounded-[16px] overflow-hidden shrink-0"
+      className="relative w-full rounded-[16px] overflow-hidden shrink-0 isolate"
       style={{
         background: '#161532',
         boxShadow:
@@ -86,7 +86,7 @@ export default function NovosProjetosBanner({ onVerTodos }) {
       />
 
       {/* ── Text + CTA (left column) ── */}
-      <div className="relative z-10 flex flex-col gap-4 p-6 h-full justify-center" style={{ maxWidth: 460 }}>
+      <div className="relative z-10 flex flex-col gap-4 p-6 h-full justify-center max-w-[380px] min-[1440px]:max-w-[631px]">
         {/* Pill label */}
         <div
           className="self-start px-2 py-0.5 rounded-full text-white uppercase text-[12px] font-medium leading-6"
@@ -138,10 +138,10 @@ export default function NovosProjetosBanner({ onVerTodos }) {
         }}
       />
 
-      {/* ── Book covers — bottom clipped by overflow-hidden ── */}
+      {/* ── Book covers — bottom clipped by overflow-hidden, always above text ── */}
       <div
-        className="absolute flex items-end"
-        style={{ right: 32, bottom: -24 }}
+        className="absolute flex items-end z-20"
+        style={{ right: 40, top: 42 }}
       >
         <BookCover src={book1} rotation={-2} zIndex={1} />
         <BookCover src={book2} rotation={-1} zIndex={2} />

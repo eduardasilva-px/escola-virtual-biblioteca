@@ -169,6 +169,7 @@ export default function BibliotecaPage() {
   const [filterState, setFilterState] = useState({
     grade:   new Set(),
     subject: new Set(),
+    editora: new Set(),
   })
 
   function handleFilterToggle(key, value) {
@@ -209,7 +210,7 @@ export default function BibliotecaPage() {
   const filters = [
     { key: 'grade',   label: 'Ano de escolaridade', items: gradeItems,   selectedItems: filterState.grade   },
     { key: 'subject', label: 'Disciplina',           items: subjectItems, selectedItems: filterState.subject },
-    { key: 'editora', label: 'Editora',              items: [],           selectedItems: new Set()           },
+    { key: 'editora', label: 'Editora', items: ['Porto Editora', 'Areal Editores', 'Raiz Editora'], selectedItems: filterState.editora, showSearch: false },
   ]
 
   /** Returns true when a book passes all active filters */
@@ -547,7 +548,7 @@ export default function BibliotecaPage() {
                   ) : (
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(145px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {[...visiblePinnedBooks, ...visibleGridBooks].map((book) => (
                         <BookCard
@@ -575,7 +576,7 @@ export default function BibliotecaPage() {
                           title={book.title}
                           grade={book.grade}
                           pinned
-                          width={125}
+                          width={172}
                           onPinToggle={() => handleTogglePin(book)}
                           onRemove={() => handleRemoveRequest(book)}
                         />
@@ -583,11 +584,14 @@ export default function BibliotecaPage() {
                     </div>
                   </section>
 
+                  {/* ── Separator ── */}
+                  <div className="w-full h-px bg-[#d8d8d7] flex-shrink-0" />
+
                   {/* ── All books grid — responsive 6–8 columns, bottom-aligned ── */}
-                  <section aria-label="Todos os manuais" className="w-full">
+                  <section aria-label="Todos os manuais" className="w-full -mt-2">
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(145px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {visibleGridBooks.map((book) => (
                         <BookCard

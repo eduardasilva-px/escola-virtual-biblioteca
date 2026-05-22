@@ -174,6 +174,7 @@ export default function NovosProjetosPage() {
   const [filterState, setFilterState] = useState({
     grade:   new Set(),
     subject: new Set(),
+    editora: new Set(),
   })
 
   function handleFilterToggle(key, value) {
@@ -185,7 +186,7 @@ export default function NovosProjetosPage() {
   }
 
   function handleClearFilters() {
-    setFilterState({ grade: new Set(), subject: new Set() })
+    setFilterState({ grade: new Set(), subject: new Set(), editora: new Set() })
   }
 
   /** Available items for each filter — derived from the current library. */
@@ -208,19 +209,20 @@ export default function NovosProjetosPage() {
   )
 
   const hasActiveFilters =
-    filterState.grade.size > 0 || filterState.subject.size > 0
+    filterState.grade.size > 0 || filterState.subject.size > 0 || filterState.editora.size > 0
 
   /** Filter configs passed down to SearchBar */
   const filters = [
-    { key: 'grade',   label: 'Ano de escolaridade', items: gradeItems,   selectedItems: filterState.grade   },
-    { key: 'subject', label: 'Disciplina',           items: subjectItems, selectedItems: filterState.subject },
-    { key: 'editora', label: 'Editora',              items: [],           selectedItems: new Set()           },
+    { key: 'grade',   label: 'Ano de escolaridade', items: gradeItems,   selectedItems: filterState.grade                                                },
+    { key: 'subject', label: 'Disciplina',           items: subjectItems, selectedItems: filterState.subject                                              },
+    { key: 'editora', label: 'Editora',              items: ['Porto Editora', 'Areal Editores', 'Raiz Editora'], selectedItems: filterState.editora, showSearch: false },
   ]
 
   /** Returns true when a book passes all active filters */
   function bookMatchesFilters(book) {
-    if (filterState.grade.size > 0   && !filterState.grade.has(book.grade))   return false
-    if (filterState.subject.size > 0 && !filterState.subject.has(book.title)) return false
+    if (filterState.grade.size > 0   && !filterState.grade.has(book.grade))      return false
+    if (filterState.subject.size > 0 && !filterState.subject.has(book.title))    return false
+    if (filterState.editora.size > 0 && !filterState.editora.has(book.editora))  return false
     return true
   }
 
@@ -560,7 +562,7 @@ export default function NovosProjetosPage() {
                   ) : (
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(145px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {[...visiblePinnedBooks, ...visibleGridBooks].map((book) => (
                         <BookCard
@@ -588,7 +590,7 @@ export default function NovosProjetosPage() {
                           title={book.title}
                           grade={book.grade}
                           pinned
-                          width={125}
+                          width={172}
                           onPinToggle={() => handleTogglePin(book)}
                           onRemove={() => handleRemoveRequest(book)}
                         />
@@ -596,11 +598,14 @@ export default function NovosProjetosPage() {
                     </div>
                   </section>
 
+                  {/* ── Separator ── */}
+                  <div className="w-full h-px bg-[#d8d8d7] flex-shrink-0" />
+
                   {/* ── All books grid — responsive 6–8 columns, bottom-aligned ── */}
-                  <section aria-label="Todos os manuais" className="w-full">
+                  <section aria-label="Todos os manuais" className="w-full -mt-2">
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(155px, calc((100% - 112px) / 8)), 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(max(145px, calc((100% - 112px) / 8)), 1fr))' }}
                     >
                       {visibleGridBooks.map((book) => (
                         <BookCard

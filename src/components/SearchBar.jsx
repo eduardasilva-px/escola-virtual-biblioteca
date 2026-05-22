@@ -108,6 +108,7 @@ export default function SearchBar({
                   items={f.items}
                   selectedItems={f.selectedItems}
                   onToggle={(value) => onFilterToggle(f.key, value)}
+                  showSearch={f.showSearch !== false}
                 />
               ))}
             </div>

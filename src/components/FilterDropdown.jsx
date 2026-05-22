@@ -12,16 +12,16 @@ import { Search } from 'lucide-react'
  *  - selectedItems {Set}       currently selected values
  *  - onToggle      {fn}        called with the item string when a row is clicked
  */
-export default function FilterDropdown({ items, selectedItems, onToggle }) {
+export default function FilterDropdown({ items, selectedItems, onToggle, showSearch = true }) {
   const [search, setSearch] = useState('')
   const inputRef = useRef(null)
 
   // Auto-focus the search input when the dropdown opens
-  useEffect(() => { inputRef.current?.focus() }, [])
+  useEffect(() => { if (showSearch) inputRef.current?.focus() }, [showSearch])
 
-  const filtered = items.filter((item) =>
-    item.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filtered = showSearch
+    ? items.filter((item) => item.toLowerCase().includes(search.toLowerCase()))
+    : items
 
   return (
     <div
@@ -34,24 +34,26 @@ export default function FilterDropdown({ items, selectedItems, onToggle }) {
         width: 320,
       }}
     >
-      {/* ── Search input ── */}
-      <div style={{ padding: '4px 4px 0' }}>
-        <div
-          className="flex items-center gap-1 h-8 px-3 py-1 rounded-[8px]"
-          style={{ background: 'white', border: '1px solid #d0d0cf' }}
-        >
-          <Search size={14} strokeWidth={1.75} className="shrink-0 text-[#535353]" aria-hidden="true" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Pesquisar"
-            autoComplete="off"
-            className="flex-1 min-w-0 bg-transparent text-[14px] font-normal leading-5 text-[#535353] placeholder:text-[#535353] outline-none"
-          />
+      {/* ── Search input (optional) ── */}
+      {showSearch && (
+        <div style={{ padding: '4px 4px 0' }}>
+          <div
+            className="flex items-center gap-1 h-8 px-3 py-1 rounded-[8px]"
+            style={{ background: 'white', border: '1px solid #d0d0cf' }}
+          >
+            <Search size={14} strokeWidth={1.75} className="shrink-0 text-[#535353]" aria-hidden="true" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar"
+              autoComplete="off"
+              className="flex-1 min-w-0 bg-transparent text-[14px] font-normal leading-5 text-[#535353] placeholder:text-[#535353] outline-none"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Items list ── */}
       <div

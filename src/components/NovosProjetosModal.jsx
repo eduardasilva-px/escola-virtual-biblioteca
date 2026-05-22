@@ -55,8 +55,7 @@ const BOOKS = [
 function ModalBookCard({ cover, title, grade }) {
   return (
     <div
-      className="flex flex-col gap-2 items-start shrink-0 cursor-pointer group transition-transform duration-200 ease-out hover:-translate-y-1.5"
-      style={{ width: 144 }}
+      className="flex flex-col gap-2 items-start cursor-pointer group transition-transform duration-200 ease-out hover:-translate-y-1.5 min-w-0"
     >
       <div
         className="relative w-full rounded-[4px] overflow-hidden"
@@ -140,12 +139,9 @@ export default function NovosProjetosModal({ onClose }) {
           </button>
         </div>
 
-        {/* Separator */}
-        <div className="h-px bg-[#d8d8d7] mx-4 flex-shrink-0" />
-
         {/* ── Scrollable grid ── */}
         <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-thin">
-          <div className="flex flex-wrap gap-4 items-end">
+          <div className="grid grid-cols-5 gap-4">
             {BOOKS.map(book => (
               <ModalBookCard key={book.id} {...book} />
             ))}
