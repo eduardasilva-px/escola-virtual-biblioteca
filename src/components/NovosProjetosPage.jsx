@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import NovosProjetosBanner from './NovosProjetosBanner'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import AppBanner from './AppBanner'
@@ -536,6 +537,9 @@ export default function NovosProjetosPage() {
             </div>
 
             <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
+
+              {/* ── Novos Projetos banner — hidden while filters are active ── */}
+              {!hasActiveFilters && <NovosProjetosBanner />}
 
               {hasActiveFilters ? (
                 /* ── Filtered view — all matching books in one unified grid, same size ── */
