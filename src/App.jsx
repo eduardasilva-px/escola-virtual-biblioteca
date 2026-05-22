@@ -17,7 +17,14 @@ export default function App() {
   const path = usePathname()
 
   function renderPage() {
+    if (path === '/' || path === '') {
+      window.history.replaceState(null, '', '/biblioteca')
+      return <BibliotecaPage />
+    }
     if (path === '/novosprojetos') return <NovosProjetosPage />
+    if (path === '/biblioteca') return <BibliotecaPage />
+    // fallback
+    window.history.replaceState(null, '', '/biblioteca')
     return <BibliotecaPage />
   }
 
