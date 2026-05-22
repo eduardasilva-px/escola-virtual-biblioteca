@@ -254,7 +254,7 @@ export default function BibliotecaPage() {
       clearTimeout(unmountTimerRef.current)
       setOverlayMounted(true)
     } else {
-      unmountTimerRef.current = setTimeout(() => setOverlayMounted(false), 220)
+      unmountTimerRef.current = setTimeout(() => setOverlayMounted(false), 240)
     }
     return () => clearTimeout(unmountTimerRef.current)
   }, [isOverlayOpen])
@@ -279,6 +279,17 @@ export default function BibliotecaPage() {
       (book) => norm(book.title).includes(q) || norm(book.grade).includes(q),
     )
   }, [debouncedQuery])
+
+  /* ── portalSearchOpen: starts false so the search bar width-animates on mount ── */
+  const [portalSearchOpen, setPortalSearchOpen] = useState(false)
+  useEffect(() => {
+    if (overlayMounted) {
+      setPortalSearchOpen(false)
+      requestAnimationFrame(() => setPortalSearchOpen(true))
+    } else {
+      setPortalSearchOpen(false)
+    }
+  }, [overlayMounted])
 
   /* ── Overlay + backdrop fixed positions ── */
   const [backdropFixedStyle, setBackdropFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
@@ -619,7 +630,7 @@ export default function BibliotecaPage() {
       {/* Backdrop — covers the full white container */}
       <div
         style={backdropFixedStyle}
-        className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
+        className={isExiting ? 'backdrop-exit' : 'backdrop-enter'}
       />
 
       {/* Floating results container */}
@@ -649,7 +660,7 @@ export default function BibliotecaPage() {
               onClear={clearSearch}
               inputRef={searchInputRef}
               containerRef={searchBarRef}
-              isOpen={true}
+              isOpen={portalSearchOpen}
               filters={filters}
               onFilterToggle={handleFilterToggle}
               onClearFilters={handleClearFilters}
