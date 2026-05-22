@@ -269,18 +269,20 @@ export default function BibliotecaPage() {
 
   /* ── Overlay fixed position: measure sticky row on open + on resize ── */
   const [overlayFixedStyle, setOverlayFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
+  const [overlayTopOffset, setOverlayTopOffset]   = useState(0)
   useEffect(() => {
     function compute() {
-      if (!searchBarRef.current) return
-      const rect        = searchBarRef.current.getBoundingClientRect()
-      const mainEl      = document.querySelector('main')
-      const containerEl = mainEl?.closest('[class*="rounded-\\[16px\\]"]') ?? mainEl
+      if (!stickyRowRef.current) return
+      const stickyRect    = stickyRowRef.current.getBoundingClientRect()
+      const mainEl        = document.querySelector('main')
+      const containerEl   = mainEl?.closest('[class*="rounded-\\[16px\\]"]') ?? mainEl
       const containerRect = containerEl
         ? containerEl.getBoundingClientRect()
         : { left: 0, right: window.innerWidth, bottom: window.innerHeight }
+      setOverlayTopOffset(stickyRect.height)
       setOverlayFixedStyle({
         position: 'fixed',
-        top:    rect.bottom + 8,
+        top:    stickyRect.top,
         left:   containerRect.left + 8,
         right:  window.innerWidth - containerRect.right + 8,
         bottom: window.innerHeight - containerRect.bottom + 8,
@@ -521,6 +523,7 @@ export default function BibliotecaPage() {
                     onClose={clearSearch}
                     isExiting={isExiting}
                     openCount={openCount}
+                    topOffset={overlayTopOffset}
                   />
                 </div>
               )}

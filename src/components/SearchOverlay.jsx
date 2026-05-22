@@ -25,6 +25,7 @@ export default function SearchOverlay({
   onClose,
   isExiting = false,
   openCount = 0,
+  topOffset = 0,
 }) {
   const scrollRef = useRef(null)
 
@@ -64,7 +65,7 @@ export default function SearchOverlay({
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto overflow-x-hidden min-h-0"
-        style={{ padding: '12px 16px 120px' }}
+        style={{ padding: `${topOffset + 12}px 16px 120px` }}
       >
         {isEmpty ? (
           <SearchEmptyState query={query} />
