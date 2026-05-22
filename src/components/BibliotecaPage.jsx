@@ -6,7 +6,8 @@ import AppBanner from './AppBanner'
 import SearchBar from './SearchBar'
 import BookCard from './BookCard'
 import FloatingButton from './FloatingButton'
-import SearchOverlay from './SearchOverlay'
+import CatalogueCard from './CatalogueCard'
+import SearchEmptyState from './SearchEmptyState'
 import Toast from './Toast'
 import FilterEmptyState from './FilterEmptyState'
 import ConfirmRemoveDialog from './ConfirmRemoveDialog'
@@ -267,36 +268,15 @@ export default function BibliotecaPage() {
     if (isOverlayOpen) setOpenCount((c) => c + 1)
   }, [isOverlayOpen])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Overlay fixed position: measure sticky row on open + on resize ── */
-  const [overlayFixedStyle, setOverlayFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
-  const [overlayTopOffset, setOverlayTopOffset]   = useState(0)
-  useEffect(() => {
-    function compute() {
-      if (!stickyRowRef.current) return
-      const stickyRect    = stickyRowRef.current.getBoundingClientRect()
-      const mainEl        = document.querySelector('main')
-      const containerEl   = mainEl?.closest('[class*="rounded-\\[16px\\]"]') ?? mainEl
-      const containerRect = containerEl
-        ? containerEl.getBoundingClientRect()
-        : { left: 0, right: window.innerWidth, bottom: window.innerHeight }
-      setOverlayTopOffset(stickyRect.height)
-      setOverlayFixedStyle({
-        position: 'fixed',
-        top:    stickyRect.top,
-        left:   containerRect.left + 8,
-        right:  window.innerWidth - containerRect.right + 8,
-        bottom: window.innerHeight - containerRect.bottom + 8,
-        zIndex: 15,
-      })
-    }
-    if (overlayMounted) {
-      compute()
-      window.addEventListener('resize', compute)
-      return () => window.removeEventListener('resize', compute)
-    } else {
-      setOverlayFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
-    }
-  }, [overlayMounted])
+  /* ── Catalogue search results — filtered from CATALOGUE by debouncedQuery ── */
+  const catalogueResults = useMemo(() => {
+    const norm = (str) => str.normalize('NFC').toLowerCase()
+    if (!debouncedQuery.trim()) return CATALOGUE
+    const q = norm(debouncedQuery)
+    return CATALOGUE.filter(
+      (book) => norm(book.title).includes(q) || norm(book.grade).includes(q),
+    )
+  }, [debouncedQuery])
 
   /* ── Debounce: update `debouncedQuery` 250 ms after the user stops typing ── */
   useEffect(() => {
@@ -486,10 +466,10 @@ export default function BibliotecaPage() {
             {/* Banner — first in scroll, disappears as user scrolls down */}
             {showBanner && <AppBanner onClose={() => setShowBanner(false)} />}
 
-            {/* ── Sticky search + filter row — sticks to top of main after banner scrolls away ── */}
+            {/* ── Sticky search + filter row ── */}
             <div
               ref={stickyRowRef}
-              className={`sticky top-0 z-[20] relative w-full ${isOverlayOpen ? '' : 'bg-white'}`}
+              className="sticky top-0 z-[20] relative w-full bg-white"
               style={{ padding: '24px 24px 20px' }}
             >
               <SearchBar
@@ -505,30 +485,50 @@ export default function BibliotecaPage() {
                 sortOrder={sortOrder}
                 onSortChange={setSortOrder}
               />
-
-              {/* ── Catalogue dialog — absolute child of the sticky row so it follows it.
-                   top: calc(100% + 8px) = 60 px (row height) + 8 px gap = 68 px,
-                   which maps to the same visual position as the old top: 156 px / 120 px. ── */}
-              {overlayMounted && (
-                <div
-                  style={overlayFixedStyle}
-                  onClick={(e) => { if (e.target === e.currentTarget) clearSearch() }}
-                >
-                  <SearchOverlay
-                    query={debouncedQuery}
-                    rawQuery={query}
-                    catalogue={CATALOGUE}
-                    addedIds={libraryBookIds}
-                    onAdd={handleAdd}
-                    onClose={clearSearch}
-                    isExiting={isExiting}
-                    openCount={openCount}
-                    topOffset={overlayTopOffset}
-                  />
-                </div>
-              )}
             </div>
 
+            {/* ── Inline catalogue results — shown while searching ── */}
+            {overlayMounted && (
+              <div
+                id="catalogue-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Catálogo de manuais"
+                className={`w-full pb-[120px] ${isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}`}
+                style={{ padding: '12px 16px 120px' }}
+              >
+                {catalogueResults.length === 0 ? (
+                  <SearchEmptyState query={debouncedQuery} />
+                ) : (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))',
+                      gap: '24px',
+                      alignItems: 'end',
+                    }}
+                  >
+                    {catalogueResults.map((book, idx) => (
+                      <div
+                        key={`${book.id}-${openCount}`}
+                        className="card-enter"
+                        style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
+                      >
+                        <CatalogueCard
+                          book={book}
+                          searchQuery={query}
+                          isAdded={libraryBookIds.has(book.id)}
+                          onAdd={handleAdd}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Library content — hidden while searching ── */}
+            {!overlayMounted && (
             <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
 
               {hasActiveFilters ? (
@@ -603,6 +603,7 @@ export default function BibliotecaPage() {
               )}
 
             </div>
+            )}
           </main>
         </div>
       </div>
