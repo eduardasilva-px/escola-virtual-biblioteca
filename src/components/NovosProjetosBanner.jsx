@@ -1,4 +1,4 @@
-import bgPattern    from '../assets/images/banner-bg-pattern.png'
+import bgCircles    from '../assets/images/banner-bg-circles.svg'
 import ellipse      from '../assets/images/banner-ellipse.png'
 import bookOverlay  from '../assets/images/banner-book-overlay.png'
 import book1        from '../assets/images/banner-book-1.jpg'
@@ -10,7 +10,7 @@ import { ArrowRight } from 'lucide-react'
 function BookCover({ src, rotation, zIndex }) {
   return (
     <div
-      className="relative shrink-0 w-[143px]"
+      className="relative shrink-0 w-[143px] cursor-pointer transition-transform duration-200 ease-out hover:-translate-y-2 group"
       style={{ marginRight: '-15px', zIndex }}
     >
       <div style={{ transform: `rotate(${rotation}deg)` }}>
@@ -42,13 +42,15 @@ function BookCover({ src, rotation, zIndex }) {
                 'linear-gradient(270deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 91.5%, rgba(0,0,0,0.10) 94.1%, rgba(255,255,255,0.16) 94.5%, rgba(0,0,0,0.06) 95.3%, rgba(0,0,0,0.04) 97.4%, rgba(255,255,255,0) 100%)',
             }}
           />
+          {/* Hover highlight */}
+          <div className="absolute inset-0 bg-white/0 group-hover:bg-white/15 transition-colors duration-200" />
         </div>
       </div>
     </div>
   )
 }
 
-export default function NovosProjetosBanner() {
+export default function NovosProjetosBanner({ onVerTodos }) {
   return (
     <div
       className="relative w-full rounded-[16px] overflow-hidden shrink-0"
@@ -59,9 +61,9 @@ export default function NovosProjetosBanner() {
         height: 240,
       }}
     >
-      {/* ── Left background pattern ── */}
+      {/* ── Background circles pattern ── */}
       <img
-        src={bgPattern}
+        src={bgCircles}
         alt=""
         aria-hidden="true"
         className="absolute pointer-events-none select-none"
@@ -107,8 +109,9 @@ export default function NovosProjetosBanner() {
           </p>
         </div>
 
-        {/* CTA button */}
+        {/* CTA button — 32px tall */}
         <button
+          onClick={onVerTodos}
           className="self-start flex items-center gap-1.5 h-8 px-2.5 rounded-[6px] text-[14px] font-medium text-[#080c10] transition-colors duration-100"
           style={{
             background: '#f6f6f5',
@@ -121,10 +124,24 @@ export default function NovosProjetosBanner() {
         </button>
       </div>
 
-      {/* ── Book covers (right side) ── */}
+      {/* ── Shadow beneath books ── */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          right: 42,
+          top: 201,
+          width: 529,
+          height: 65,
+          background: 'rgba(20,27,39,0.20)',
+          filter: 'blur(10px)',
+          borderRadius: '50%',
+        }}
+      />
+
+      {/* ── Book covers — bottom clipped by overflow-hidden ── */}
       <div
         className="absolute flex items-end"
-        style={{ right: 32, bottom: 0, top: 0, alignItems: 'flex-end', paddingBottom: 18 }}
+        style={{ right: 32, bottom: -24 }}
       >
         <BookCover src={book1} rotation={-2} zIndex={1} />
         <BookCover src={book2} rotation={-1} zIndex={2} />

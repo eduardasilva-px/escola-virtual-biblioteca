@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import NovosProjetosBanner from './NovosProjetosBanner'
+import NovosProjetosModal from './NovosProjetosModal'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import AppBanner from './AppBanner'
@@ -132,6 +133,9 @@ const CATALOGUE = [
 ].sort((a, b) => (parseInt(a.grade) || 0) - (parseInt(b.grade) || 0))
 
 export default function NovosProjetosPage() {
+  /* ── Modal state ── */
+  const [modalOpen, setModalOpen] = useState(false)
+
   /* ── Search state ── */
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
@@ -372,7 +376,7 @@ export default function NovosProjetosPage() {
     } else {
       // Pin → append to pinned strip
       setGridBooks((prev) => prev.filter((b) => b.id !== book.id))
-      setPinnedBooks((prev) => [...prev, { ...book, pinned: true }])
+      setPinnedBooks((prev) => [{ ...book, pinned: true }, ...prev])
     }
   }
 
@@ -539,7 +543,12 @@ export default function NovosProjetosPage() {
             <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
 
               {/* ── Novos Projetos banner — hidden while filters are active ── */}
-              {!hasActiveFilters && <NovosProjetosBanner />}
+              {!hasActiveFilters && (
+                <NovosProjetosBanner onVerTodos={() => setModalOpen(true)} />
+              )}
+              {modalOpen && (
+                <NovosProjetosModal onClose={() => setModalOpen(false)} />
+              )}
 
               {hasActiveFilters ? (
                 /* ── Filtered view — all matching books in one unified grid, same size ── */

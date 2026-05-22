@@ -371,7 +371,7 @@ export default function BibliotecaPage() {
     } else {
       // Pin → append to pinned strip
       setGridBooks((prev) => prev.filter((b) => b.id !== book.id))
-      setPinnedBooks((prev) => [...prev, { ...book, pinned: true }])
+      setPinnedBooks((prev) => [{ ...book, pinned: true }, ...prev])
     }
   }
 
