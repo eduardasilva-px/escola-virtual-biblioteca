@@ -44,6 +44,7 @@ import coverMat7       from '../assets/images/book-ciencias-9.jpg'
 import coverRow3a      from '../assets/images/book-espanhol.jpg'
 import coverRow3b      from '../assets/images/book-matematica2.jpg'
 import coverRow3c      from '../assets/images/book-sucesso.jpg'
+import coverHistoriaA11 from '../assets/images/book-historia-a-11.jpg'
 
 // ── Catalogue covers — real Figma assets ──
 import catMat1ano     from '../assets/images/cat-mat-1ano.jpg'
@@ -79,8 +80,9 @@ const INITIAL_GRID_BOOKS = [
   { id: 'ciencias-9',  cover: coverCiencias9, title: 'Ciências Naturais', grade: '9°ano',  pinned: false },
   { id: 'espanhol-6',  cover: coverEspanhol,  title: 'Espanhol',          grade: '6°ano',  pinned: false },
   { id: 'matematica-9',cover: catMat9ano,     title: 'Matemática',         grade: '9°ano',  pinned: false },
-  { id: 'ciencias-7',  cover: coverRow3b,     title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
-  { id: 'sucesso-8',   cover: coverRow3c,     title: 'Inglês',            grade: '8°ano',  pinned: false },
+  { id: 'ciencias-7',   cover: coverRow3b,      title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
+  { id: 'sucesso-8',    cover: coverRow3c,      title: 'Inglês',            grade: '8°ano',  pinned: false },
+  { id: 'historia-a-11', cover: coverHistoriaA11, title: 'História A',       grade: '11°ano', pinned: false },
 ]
 
 /** IDs of the books that ship in the library — used to seed CATALOGUE badges on first render */
@@ -132,6 +134,8 @@ const CATALOGUE = [
 
 export default function BibliotecaPage() {
   /* ── Search state ── */
+  const [showBanner, setShowBanner] = useState(true)
+
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
@@ -181,7 +185,7 @@ export default function BibliotecaPage() {
   }
 
   function handleClearFilters() {
-    setFilterState({ grade: new Set(), subject: new Set() })
+    setFilterState({ grade: new Set(), subject: new Set(), editora: new Set() })
   }
 
   /** Available items for each filter — derived from the current library. */
@@ -204,7 +208,7 @@ export default function BibliotecaPage() {
   )
 
   const hasActiveFilters =
-    filterState.grade.size > 0 || filterState.subject.size > 0
+    filterState.grade.size > 0 || filterState.subject.size > 0 || filterState.editora.size > 0
 
   /** Filter configs passed down to SearchBar */
   const filters = [
@@ -215,8 +219,9 @@ export default function BibliotecaPage() {
 
   /** Returns true when a book passes all active filters */
   function bookMatchesFilters(book) {
-    if (filterState.grade.size > 0   && !filterState.grade.has(book.grade))   return false
-    if (filterState.subject.size > 0 && !filterState.subject.has(book.title)) return false
+    if (filterState.grade.size > 0   && !filterState.grade.has(book.grade))      return false
+    if (filterState.subject.size > 0 && !filterState.subject.has(book.title))    return false
+    if (filterState.editora.size > 0 && !filterState.editora.has(book.editora))  return false
     return true
   }
 
@@ -270,16 +275,15 @@ export default function BibliotecaPage() {
       const rect        = searchBarRef.current.getBoundingClientRect()
       const mainEl      = document.querySelector('main')
       const containerEl = mainEl?.closest('[class*="rounded-\\[16px\\]"]') ?? mainEl
-      const mainRight   = mainEl ? mainEl.getBoundingClientRect().right : window.innerWidth
-      const containerBottom = containerEl
-        ? containerEl.getBoundingClientRect().bottom
-        : window.innerHeight
+      const containerRect = containerEl
+        ? containerEl.getBoundingClientRect()
+        : { left: 0, right: window.innerWidth, bottom: window.innerHeight }
       setOverlayFixedStyle({
         position: 'fixed',
         top:    rect.bottom + 8,
-        left:   rect.left,
-        right:  window.innerWidth - mainRight + 24,
-        bottom: window.innerHeight - containerBottom + 24,
+        left:   containerRect.left + 8,
+        right:  window.innerWidth - containerRect.right + 8,
+        bottom: window.innerHeight - containerRect.bottom + 8,
         zIndex: 15,
       })
     }
@@ -471,22 +475,6 @@ export default function BibliotecaPage() {
           {/* ── Top bar ── */}
           <TopBar />
 
-          {/* ── Overlay backdrop — covers everything below TopBar.
-               z-[10]: below sticky search row (z-[20]) but above scrolled content.
-               main has no z-index so the sticky row's z-[20] competes in the same
-               stacking context as this backdrop. ── */}
-          {overlayMounted && (
-            <div
-              aria-hidden="true"
-              className={`absolute inset-x-0 bottom-0 z-[10] cursor-default pointer-events-auto ${isExiting ? 'backdrop-exit' : 'backdrop-enter'}`}
-              style={{
-                top: '52px',
-                background:
-                  'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 50.962%, rgba(0,0,0,0.2) 100%)',
-              }}
-              onClick={clearSearch}
-            />
-          )}
 
           {/* ── Scrollable main content ── */}
           <main
@@ -494,10 +482,9 @@ export default function BibliotecaPage() {
             aria-label="Conteúdo da Biblioteca"
           >
             {/* Banner — first in scroll, disappears as user scrolls down */}
-            <AppBanner />
+            {showBanner && <AppBanner onClose={() => setShowBanner(false)} />}
 
-            {/* ── Sticky search + filter row — sticks to top of main after banner scrolls away.
-                 No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}
+            {/* ── Sticky search + filter row — sticks to top of main after banner scrolls away ── */}
             <div
               ref={stickyRowRef}
               className={`sticky top-0 z-[20] relative w-full ${isOverlayOpen ? '' : 'bg-white'}`}
@@ -521,7 +508,10 @@ export default function BibliotecaPage() {
                    top: calc(100% + 8px) = 60 px (row height) + 8 px gap = 68 px,
                    which maps to the same visual position as the old top: 156 px / 120 px. ── */}
               {overlayMounted && (
-                <div style={overlayFixedStyle}>
+                <div
+                  style={overlayFixedStyle}
+                  onClick={(e) => { if (e.target === e.currentTarget) clearSearch() }}
+                >
                   <SearchOverlay
                     query={debouncedQuery}
                     rawQuery={query}

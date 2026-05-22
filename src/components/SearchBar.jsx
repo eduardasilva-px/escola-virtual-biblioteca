@@ -38,15 +38,22 @@ export default function SearchBar({
     <div ref={containerRef} className="relative shrink-0 w-full">
       <div className="flex gap-3 items-center w-full">
 
-        {/* Search input — fixed width so the sort button never shifts */}
-        <div className="shrink-0">
+        {/* Search input — animates width when the catalogue overlay opens/closes */}
+        <div
+          className="shrink-0"
+          style={{
+            width: isOpen ? '564px' : '338px',
+            transition: 'width 220ms cubic-bezier(0.4,0,0.2,1)',
+          }}
+        >
           <label htmlFor="search-biblioteca" className="sr-only">
             Explorar catálogo e adicionar livros
           </label>
           <div
             className="flex gap-3 h-9 items-center px-3 py-1 rounded-[8px] transition-[box-shadow] duration-150"
             style={{
-              width: '338px',
+              width: '100%',
+              overflow: 'hidden',
               background: 'var(--background)',
               border: '1px solid var(--input)',
               boxShadow: isActive
