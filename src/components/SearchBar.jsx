@@ -53,7 +53,6 @@ export default function SearchBar({
             className="flex gap-3 h-9 items-center px-3 py-1 rounded-[8px] transition-[box-shadow] duration-150"
             style={{
               width: '100%',
-              overflow: 'hidden',
               background: 'var(--background)',
               border: '1px solid var(--input)',
               boxShadow: isActive
@@ -103,8 +102,11 @@ export default function SearchBar({
             </div>
         </div>
 
-        {/* Filter buttons + Sort — flex-1 so sort is always pinned to the right */}
-        <div className="flex flex-1 min-w-0 items-center justify-between">
+        {/* Filter buttons + Sort — fade out when the catalogue overlay is open */}
+        <div
+          className="flex flex-1 min-w-0 items-center justify-between transition-[opacity] duration-200"
+          style={{ opacity: isOpen ? 0 : 1, pointerEvents: isOpen ? 'none' : 'auto' }}
+        >
           {/* Filter buttons group + Limpar filtros */}
           <div className="flex gap-1.5 items-center shrink-0">
             <div className="flex gap-3 items-center shrink-0">
