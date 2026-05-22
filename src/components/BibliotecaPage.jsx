@@ -239,6 +239,7 @@ export default function BibliotecaPage() {
   const searchInputRef = useRef(null)
   const stickyRowRef   = useRef(null)
   const searchBarRef   = useRef(null)
+  const mainRef        = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -277,6 +278,32 @@ export default function BibliotecaPage() {
       (book) => norm(book.title).includes(q) || norm(book.grade).includes(q),
     )
   }, [debouncedQuery])
+
+  /* ── Overlay fixed position: covers the main content area with 8 px margin ── */
+  const [overlayFixedStyle, setOverlayFixedStyle] = useState({
+    position: 'fixed', top: -9999, visibility: 'hidden',
+  })
+  useEffect(() => {
+    function compute() {
+      if (!mainRef.current) return
+      const rect = mainRef.current.getBoundingClientRect()
+      setOverlayFixedStyle({
+        position: 'fixed',
+        top:    rect.top    + 8,
+        left:   rect.left   + 8,
+        right:  window.innerWidth  - rect.right  + 8,
+        bottom: window.innerHeight - rect.bottom + 8,
+        zIndex: 50,
+      })
+    }
+    if (overlayMounted) {
+      compute()
+      window.addEventListener('resize', compute)
+      return () => window.removeEventListener('resize', compute)
+    } else {
+      setOverlayFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
+    }
+  }, [overlayMounted])
 
   /* ── Debounce: update `debouncedQuery` 250 ms after the user stops typing ── */
   useEffect(() => {
@@ -458,77 +485,39 @@ export default function BibliotecaPage() {
           <TopBar />
 
 
+          {/* Banner — sits between TopBar and main, stays visible above the overlay */}
+          {showBanner && <AppBanner onClose={() => setShowBanner(false)} />}
+
           {/* ── Scrollable main content ── */}
           <main
+            ref={mainRef}
             className="relative flex-1 w-full overflow-x-clip overflow-y-auto min-h-0"
             aria-label="Conteúdo da Biblioteca"
           >
-            {/* Banner — first in scroll, disappears as user scrolls down */}
-            {showBanner && <AppBanner onClose={() => setShowBanner(false)} />}
-
-            {/* ── Sticky search + filter row ── */}
+            {/* ── Sticky search + filter row — hidden (but keeps height) while overlay is open ── */}
             <div
               ref={stickyRowRef}
               className="sticky top-0 z-[20] relative w-full bg-white"
               style={{ padding: '24px 24px 20px' }}
             >
-              <SearchBar
-                query={query}
-                onQueryChange={setQuery}
-                onClear={clearSearch}
-                inputRef={searchInputRef}
-                containerRef={searchBarRef}
-                isOpen={isOverlayOpen}
-                filters={filters}
-                onFilterToggle={handleFilterToggle}
-                onClearFilters={handleClearFilters}
-                sortOrder={sortOrder}
-                onSortChange={setSortOrder}
-              />
+              <div style={{ visibility: overlayMounted ? 'hidden' : 'visible' }}>
+                <SearchBar
+                  query={query}
+                  onQueryChange={setQuery}
+                  onClear={clearSearch}
+                  inputRef={searchInputRef}
+                  containerRef={searchBarRef}
+                  isOpen={false}
+                  filters={filters}
+                  onFilterToggle={handleFilterToggle}
+                  onClearFilters={handleClearFilters}
+                  sortOrder={sortOrder}
+                  onSortChange={setSortOrder}
+                />
+              </div>
             </div>
 
-            {/* ── Inline catalogue results — shown while searching ── */}
-            {overlayMounted && (
-              <div
-                id="catalogue-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Catálogo de manuais"
-                className={`w-full pb-[120px] ${isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}`}
-                style={{ padding: '12px 16px 120px' }}
-              >
-                {catalogueResults.length === 0 ? (
-                  <SearchEmptyState query={debouncedQuery} />
-                ) : (
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))',
-                      gap: '24px',
-                      alignItems: 'end',
-                    }}
-                  >
-                    {catalogueResults.map((book, idx) => (
-                      <div
-                        key={`${book.id}-${openCount}`}
-                        className="card-enter"
-                        style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
-                      >
-                        <CatalogueCard
-                          book={book}
-                          searchQuery={query}
-                          isAdded={libraryBookIds.has(book.id)}
-                          onAdd={handleAdd}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── Library content — hidden while searching ── */}
-            {!overlayMounted && (
+            {/* ── Library content — always rendered (visible behind overlay when searching) ── */}
             <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
 
               {hasActiveFilters ? (
@@ -603,11 +592,95 @@ export default function BibliotecaPage() {
               )}
 
             </div>
-            )}
           </main>
         </div>
       </div>
     </div>
+
+    {/* ── Search catalogue overlay — floating container above the Biblioteca page.
+         Positioned to cover <main> with 8 px margin on all sides.
+         Contains the expanded search bar + scrollable catalogue results.
+    ─────────────────────────────────────────────────────────────────────── */}
+    {overlayMounted && createPortal(
+      <div
+        style={overlayFixedStyle}
+        className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
+      >
+        {/* Floating container: border + shadow + rounded corners */}
+        <div
+          id="catalogue-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Catálogo de manuais"
+          className="flex flex-col h-full rounded-[14px] overflow-hidden"
+          style={{
+            background:  'var(--background)',
+            border:      '1px solid #e5e5e5',
+            boxShadow:   '0px 8px 16px -4px rgba(8,13,22,0.12), 0px 4px 6px -2px rgba(8,12,16,0.08)',
+            padding:     '16px',
+          }}
+        >
+          {/* Search bar row — always expanded (isOpen=true) */}
+          <div className="shrink-0 mb-3">
+            <SearchBar
+              query={query}
+              onQueryChange={setQuery}
+              onClear={clearSearch}
+              inputRef={searchInputRef}
+              containerRef={searchBarRef}
+              isOpen={true}
+              filters={filters}
+              onFilterToggle={handleFilterToggle}
+              onClearFilters={handleClearFilters}
+              sortOrder={sortOrder}
+              onSortChange={setSortOrder}
+            />
+          </div>
+
+          {/* Scrollable catalogue results */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative" style={{ paddingBottom: '120px' }}>
+            {catalogueResults.length === 0 ? (
+              <SearchEmptyState query={debouncedQuery} />
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))',
+                  gap: '24px',
+                  alignItems: 'end',
+                }}
+              >
+                {catalogueResults.map((book, idx) => (
+                  <div
+                    key={`${book.id}-${openCount}`}
+                    className="card-enter"
+                    style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
+                  >
+                    <CatalogueCard
+                      book={book}
+                      searchQuery={query}
+                      isAdded={libraryBookIds.has(book.id)}
+                      onAdd={handleAdd}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Footer fade gradient */}
+          <div
+            aria-hidden="true"
+            className="absolute bottom-0 left-0 right-0 pointer-events-none rounded-b-[14px]"
+            style={{
+              height: '114px',
+              background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,1) 100%)',
+            }}
+          />
+        </div>
+      </div>,
+      document.body,
+    )}
 
     {/* ── Toast portal ────────────────────────────────────────────────────
          The aria-live region is always in the DOM so screen readers register
