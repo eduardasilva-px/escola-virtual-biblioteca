@@ -46,6 +46,7 @@ import coverMat7       from '../assets/images/book-ciencias-9.jpg'
 import coverRow3a      from '../assets/images/book-espanhol.jpg'
 import coverRow3b      from '../assets/images/book-matematica2.jpg'
 import coverRow3c      from '../assets/images/book-sucesso.jpg'
+import coverHistoriaA11 from '../assets/images/book-historia-a-11.jpg'
 
 // ── Catalogue covers — real Figma assets ──
 import catMat1ano     from '../assets/images/cat-mat-1ano.jpg'
@@ -81,8 +82,9 @@ const INITIAL_GRID_BOOKS = [
   { id: 'ciencias-9',  cover: coverCiencias9, title: 'Ciências Naturais', grade: '9°ano',  pinned: false },
   { id: 'espanhol-6',  cover: coverEspanhol,  title: 'Espanhol',          grade: '6°ano',  pinned: false },
   { id: 'matematica-9',cover: catMat9ano,     title: 'Matemática',         grade: '9°ano',  pinned: false },
-  { id: 'ciencias-7',  cover: coverRow3b,     title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
-  { id: 'sucesso-8',   cover: coverRow3c,     title: 'Inglês',            grade: '8°ano',  pinned: false },
+  { id: 'ciencias-7',    cover: coverRow3b,       title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
+  { id: 'sucesso-8',    cover: coverRow3c,       title: 'Inglês',            grade: '8°ano',  pinned: false },
+  { id: 'historia-a-11', cover: coverHistoriaA11, title: 'História A',       grade: '11°ano', pinned: false },
 ]
 
 /** IDs of the books that ship in the library — used to seed CATALOGUE badges on first render */
@@ -134,6 +136,7 @@ const CATALOGUE = [
 
 export default function NovosProjetosPage() {
   /* ── Modal state ── */
+  const [showBanner, setShowBanner] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
 
   /* ── Search state ── */
@@ -500,7 +503,7 @@ export default function NovosProjetosPage() {
             aria-label="Conteúdo da Biblioteca"
           >
             {/* Banner — first in scroll, disappears as user scrolls down */}
-            <AppBanner />
+            {showBanner && <AppBanner onClose={() => setShowBanner(false)} />}
 
             {/* ── Sticky search + filter row — sticks to top of main after banner scrolls away.
                  No z-index on main means this z-[20] competes directly with the backdrop z-[10]. ── */}

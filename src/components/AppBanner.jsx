@@ -1,8 +1,9 @@
+import { X } from 'lucide-react'
 import iconEv from '../assets/images/icon-ev.png'
 import badgeApple from '../assets/images/badge-apple.png'
 import badgeGoogle from '../assets/images/badge-google.png'
 
-export default function AppBanner() {
+export default function AppBanner({ onClose }) {
   return (
     <div
       className="relative shrink-0 w-full h-9 z-[22]"
@@ -47,6 +48,16 @@ export default function AppBanner() {
             />
           </div>
         </div>
+
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fechar aviso"
+          className="shrink-0 flex items-center justify-center size-7 rounded-full transition-colors duration-100 hover:bg-black/8"
+        >
+          <X size={16} strokeWidth={1.75} aria-hidden="true" className="text-[#080c10]" />
+        </button>
       </div>
     </div>
   )
