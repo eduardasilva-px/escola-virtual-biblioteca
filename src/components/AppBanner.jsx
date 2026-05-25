@@ -9,9 +9,19 @@ export default function AppBanner({ onClose }) {
       className="relative shrink-0 w-full h-9 z-[1]"
       style={{
         background: 'linear-gradient(90deg, #fff6ed 0%, #e7f8ff 100%)',
-        boxShadow: '0px 2px 4px 0px rgba(8,12,16,0.14)',
       }}
     >
+      {/* Drop shadow — rendered as a gradient child so it paints above
+          the sibling <main> regardless of overflow/stacking behaviour */}
+      <div
+        aria-hidden="true"
+        className="absolute left-0 right-0 pointer-events-none"
+        style={{
+          bottom: '-6px',
+          height: '6px',
+          background: 'linear-gradient(to bottom, rgba(8,12,16,0.14) 0%, transparent 100%)',
+        }}
+      />
       <div className="flex gap-3 items-center px-3 py-1.5 size-full">
         {/* EV Smart Book icon */}
         <img
