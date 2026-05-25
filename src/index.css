@@ -107,6 +107,10 @@ html, body {
   }
 }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-none               { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
 /* ─────────────────────────────────────────────
    Toast animations
    Slides up from bottom-right on enter,

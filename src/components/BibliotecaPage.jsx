@@ -5,6 +5,7 @@ import TopBar from './TopBar'
 import AppBanner from './AppBanner'
 import SearchBar from './SearchBar'
 import BookCard from './BookCard'
+import PinnedBooksCarousel from './PinnedBooksCarousel'
 import FloatingButton from './FloatingButton'
 import CatalogueCard from './CatalogueCard'
 import SearchEmptyState from './SearchEmptyState'
@@ -563,22 +564,13 @@ export default function BibliotecaPage() {
                 </section>
               ) : (
                 <>
-                  {/* ── Pinned books — fixed 125px wide, bottom-aligned ── */}
-                  <section aria-label="Manuais fixados">
-                    <div className="flex gap-4 items-end">
-                      {visiblePinnedBooks.map((book) => (
-                        <BookCard
-                          key={book.id}
-                          cover={book.cover}
-                          title={book.title}
-                          grade={book.grade}
-                          pinned
-                          width={172}
-                          onPinToggle={() => handleTogglePin(book)}
-                          onRemove={() => handleRemoveRequest(book)}
-                        />
-                      ))}
-                    </div>
+                  {/* ── Pinned books — carousel when overflow ── */}
+                  <section aria-label="Manuais fixados" className="w-full">
+                    <PinnedBooksCarousel
+                      books={visiblePinnedBooks}
+                      onPinToggle={handleTogglePin}
+                      onRemove={handleRemoveRequest}
+                    />
                   </section>
 
                   {/* ── Separator ── */}
