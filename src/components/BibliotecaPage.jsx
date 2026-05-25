@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
@@ -240,7 +240,6 @@ export default function BibliotecaPage() {
   const stickyRowRef   = useRef(null)
   const searchBarRef   = useRef(null)
   const mainRef        = useRef(null)
-  const containerRef   = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -280,44 +279,27 @@ export default function BibliotecaPage() {
     )
   }, [debouncedQuery])
 
-  /* ── portalSearchOpen: starts false so the search bar width-animates on mount ── */
-  const [portalSearchOpen, setPortalSearchOpen] = useState(false)
-  useEffect(() => {
-    if (overlayMounted) {
-      setPortalSearchOpen(false)
-      requestAnimationFrame(() => setPortalSearchOpen(true))
-    } else {
-      setPortalSearchOpen(false)
-    }
-  }, [overlayMounted])
-
-  /* ── Transfer focus to the portal input the moment it mounts.
-        useLayoutEffect fires synchronously after the DOM is updated (before
-        the browser paints), so there is zero gap where keystrokes can be lost
-        as the sticky-row input hides and the portal input takes over. ── */
-  useLayoutEffect(() => {
-    if (overlayMounted) {
-      searchInputRef.current?.focus()
-    }
-  }, [overlayMounted])
-
-  /* ── Overlay + backdrop fixed positions ── */
+  /* ── Overlay + backdrop fixed positions.
+        The portal z-indices are intentionally BELOW the sticky row (z-20) so the
+        search bar always floats above the overlay — one input, never swapped. ── */
   const [backdropFixedStyle, setBackdropFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
   const [overlayFixedStyle,  setOverlayFixedStyle]  = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
+  const [overlayTopOffset,   setOverlayTopOffset]   = useState(0)
   useEffect(() => {
     function compute() {
-      if (!mainRef.current || !containerRef.current) return
-      const mainRect      = mainRef.current.getBoundingClientRect()
-      const containerRect = containerRef.current.getBoundingClientRect()
+      if (!mainRef.current || !stickyRowRef.current) return
+      const mainRect   = mainRef.current.getBoundingClientRect()
+      const stickyRect = stickyRowRef.current.getBoundingClientRect()
+      setOverlayTopOffset(stickyRect.height)
       setBackdropFixedStyle({
         position:     'fixed',
-        top:          containerRect.top,
-        left:         containerRect.left,
-        right:        window.innerWidth  - containerRect.right,
-        bottom:       window.innerHeight - containerRect.bottom,
-        borderRadius: '16px',
+        top:          mainRect.top,
+        left:         mainRect.left,
+        right:        window.innerWidth  - mainRect.right,
+        bottom:       window.innerHeight - mainRect.bottom,
+        borderRadius: '0 0 16px 16px',
         background:   'rgba(0,0,0,0.5)',
-        zIndex:       49,
+        zIndex:       14,
       })
       setOverlayFixedStyle({
         position: 'fixed',
@@ -325,7 +307,7 @@ export default function BibliotecaPage() {
         left:   mainRect.left   + 8,
         right:  window.innerWidth  - mainRect.right  + 8,
         bottom: window.innerHeight - mainRect.bottom + 8,
-        zIndex: 50,
+        zIndex: 15,
       })
     }
     if (overlayMounted) {
@@ -503,8 +485,7 @@ export default function BibliotecaPage() {
 
         {/* ── White rounded container ── */}
         <div
-          ref={containerRef}
-          className="relative flex flex-col isolate overflow-hidden rounded-[16px] w-full h-full"
+          className="relative flex flex-col overflow-hidden rounded-[16px] w-full h-full"
           style={{
             background: 'var(--background)',
             boxShadow: 'var(--shadow-container)',
@@ -528,27 +509,27 @@ export default function BibliotecaPage() {
             className="relative flex-1 w-full overflow-x-clip overflow-y-auto min-h-0"
             aria-label="Conteúdo da Biblioteca"
           >
-            {/* ── Sticky search + filter row — hidden (but keeps height) while overlay is open ── */}
+            {/* ── Sticky search + filter row.
+                 Background is transparent when the overlay is open so the overlay
+                 container's white bg + border show through behind the search bar. ── */}
             <div
               ref={stickyRowRef}
-              className="sticky top-0 z-[20] relative w-full bg-white"
+              className={`sticky top-0 z-[20] relative w-full ${overlayMounted ? '' : 'bg-white'}`}
               style={{ padding: '24px 24px 20px' }}
             >
-              <div style={{ visibility: overlayMounted ? 'hidden' : 'visible' }}>
-                <SearchBar
-                  query={query}
-                  onQueryChange={setQuery}
-                  onClear={clearSearch}
-                  inputRef={searchInputRef}
-                  containerRef={searchBarRef}
-                  isOpen={false}
-                  filters={filters}
-                  onFilterToggle={handleFilterToggle}
-                  onClearFilters={handleClearFilters}
-                  sortOrder={sortOrder}
-                  onSortChange={setSortOrder}
-                />
-              </div>
+              <SearchBar
+                query={query}
+                onQueryChange={setQuery}
+                onClear={clearSearch}
+                inputRef={searchInputRef}
+                containerRef={searchBarRef}
+                isOpen={isOverlayOpen}
+                filters={filters}
+                onFilterToggle={handleFilterToggle}
+                onClearFilters={handleClearFilters}
+                sortOrder={sortOrder}
+                onSortChange={setSortOrder}
+              />
             </div>
 
             {/* ── Library content — always rendered (visible behind overlay when searching) ── */}
@@ -648,7 +629,10 @@ export default function BibliotecaPage() {
         style={overlayFixedStyle}
         className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
       >
-        {/* Floating container: border + shadow + rounded corners */}
+        {/* Floating container: border + shadow + rounded corners.
+             The search bar lives in the sticky row (z-20) above this panel (z-15),
+             so we only need the results here. Top padding = sticky row height so
+             the results start below the search bar. */}
         <div
           id="catalogue-dialog"
           role="dialog"
@@ -656,31 +640,16 @@ export default function BibliotecaPage() {
           aria-label="Catálogo de manuais"
           className="flex flex-col h-full rounded-[14px] overflow-hidden"
           style={{
-            background:  'var(--background)',
-            border:      '1px solid #e5e5e5',
-            boxShadow:   '0px 8px 16px -4px rgba(8,13,22,0.12), 0px 4px 6px -2px rgba(8,12,16,0.08)',
-            padding:     '16px',
+            background: 'var(--background)',
+            border:     '1px solid #e5e5e5',
+            boxShadow:  '0px 8px 16px -4px rgba(8,13,22,0.12), 0px 4px 6px -2px rgba(8,12,16,0.08)',
           }}
         >
-          {/* Search bar row — always expanded (isOpen=true) */}
-          <div className="shrink-0 mb-3">
-            <SearchBar
-              query={query}
-              onQueryChange={setQuery}
-              onClear={clearSearch}
-              inputRef={searchInputRef}
-              containerRef={searchBarRef}
-              isOpen={portalSearchOpen}
-              filters={filters}
-              onFilterToggle={handleFilterToggle}
-              onClearFilters={handleClearFilters}
-              sortOrder={sortOrder}
-              onSortChange={setSortOrder}
-            />
-          </div>
-
-          {/* Scrollable catalogue results */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative" style={{ paddingBottom: '120px' }}>
+          {/* Scrollable catalogue results — padded below the floating search bar */}
+          <div
+            className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative"
+            style={{ padding: `${overlayTopOffset + 12}px 16px 120px` }}
+          >
             {catalogueResults.length === 0 ? (
               <SearchEmptyState query={debouncedQuery} />
             ) : (
