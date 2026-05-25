@@ -521,6 +521,18 @@ export default function BibliotecaPage() {
               className={`sticky top-0 z-[20] relative w-full ${overlayMounted ? '' : 'bg-white'}`}
               style={{ padding: '24px 24px 20px' }}
             >
+              {/* AppBanner drop shadow — inside the sticky row (z-20) so it
+                  paints above the white background and is always visible */}
+              {showBanner && !overlayMounted && (
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 pointer-events-none"
+                  style={{
+                    height: '6px',
+                    background: 'linear-gradient(to bottom, rgba(8,12,16,0.14) 0%, transparent 100%)',
+                  }}
+                />
+              )}
               <SearchBar
                 query={query}
                 onQueryChange={setQuery}
