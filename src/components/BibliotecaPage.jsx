@@ -643,7 +643,7 @@ export default function BibliotecaPage() {
           {/* Scrollable catalogue results — padded below the floating search bar */}
           <div
             className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative"
-            style={{ padding: `${overlayTopOffset + 12}px 16px 120px` }}
+            style={{ padding: `${overlayTopOffset + 4}px 16px 120px` }}
           >
             {catalogueResults.length === 0 ? (
               <SearchEmptyState query={debouncedQuery} />
