@@ -241,6 +241,7 @@ export default function BibliotecaPage() {
   const stickyRowRef   = useRef(null)
   const searchBarRef   = useRef(null)
   const mainRef        = useRef(null)
+  const containerRef   = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -288,17 +289,18 @@ export default function BibliotecaPage() {
   const [overlayTopOffset,   setOverlayTopOffset]   = useState(0)
   useEffect(() => {
     function compute() {
-      if (!mainRef.current || !stickyRowRef.current) return
-      const mainRect   = mainRef.current.getBoundingClientRect()
-      const stickyRect = stickyRowRef.current.getBoundingClientRect()
+      if (!mainRef.current || !stickyRowRef.current || !containerRef.current) return
+      const mainRect      = mainRef.current.getBoundingClientRect()
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const stickyRect    = stickyRowRef.current.getBoundingClientRect()
       setOverlayTopOffset(stickyRect.height)
       setBackdropFixedStyle({
         position:     'fixed',
-        top:          mainRect.top,
-        left:         mainRect.left,
-        right:        window.innerWidth  - mainRect.right,
-        bottom:       window.innerHeight - mainRect.bottom,
-        borderRadius: '0 0 16px 16px',
+        top:          containerRect.top,
+        left:         containerRect.left,
+        right:        window.innerWidth  - containerRect.right,
+        bottom:       window.innerHeight - containerRect.bottom,
+        borderRadius: '16px',
         background:   'rgba(0,0,0,0.5)',
         zIndex:       14,
       })
@@ -486,6 +488,7 @@ export default function BibliotecaPage() {
 
         {/* ── White rounded container ── */}
         <div
+          ref={containerRef}
           className="relative flex flex-col overflow-hidden rounded-[16px] w-full h-full"
           style={{
             background: 'var(--background)',
