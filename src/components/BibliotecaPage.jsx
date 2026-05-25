@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
@@ -288,6 +288,16 @@ export default function BibliotecaPage() {
       requestAnimationFrame(() => setPortalSearchOpen(true))
     } else {
       setPortalSearchOpen(false)
+    }
+  }, [overlayMounted])
+
+  /* ── Transfer focus to the portal input the moment it mounts.
+        useLayoutEffect fires synchronously after the DOM is updated (before
+        the browser paints), so there is zero gap where keystrokes can be lost
+        as the sticky-row input hides and the portal input takes over. ── */
+  useLayoutEffect(() => {
+    if (overlayMounted) {
+      searchInputRef.current?.focus()
     }
   }, [overlayMounted])
 
