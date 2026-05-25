@@ -64,7 +64,7 @@ export default function BookCard({
 
   return (
     <article
-      className="flex flex-col gap-2 items-start shrink-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer"
+      className="relative flex flex-col gap-2 items-start shrink-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer hover:z-[25]"
       style={width ? { width } : undefined}
     >
       {/* ── Cover image container — height driven by natural image dimensions ── */}
