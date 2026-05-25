@@ -80,9 +80,9 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
       {/* ── Left edge fade ── */}
       <div
         aria-hidden="true"
-        className="absolute left-0 inset-y-0 w-16 pointer-events-none transition-opacity duration-200"
+        className="absolute left-0 inset-y-0 w-24 pointer-events-none transition-opacity duration-200"
         style={{
-          background: 'linear-gradient(to right, #fff 30%, transparent)',
+          background: 'linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 60%, transparent 100%)',
           opacity: atStart ? 0 : 1,
         }}
       />
@@ -106,9 +106,9 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
       {/* ── Right edge fade ── */}
       <div
         aria-hidden="true"
-        className="absolute right-0 inset-y-0 w-16 pointer-events-none transition-opacity duration-200"
+        className="absolute right-0 inset-y-0 w-24 pointer-events-none transition-opacity duration-200"
         style={{
-          background: 'linear-gradient(to left, #fff 30%, transparent)',
+          background: 'linear-gradient(to left, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.3) 60%, transparent 100%)',
           opacity: atEnd ? 0 : 1,
         }}
       />
