@@ -306,7 +306,7 @@ export default function BibliotecaPage() {
         right:        window.innerWidth  - containerRect.right,
         bottom:       window.innerHeight - containerRect.bottom,
         borderRadius: '16px',
-        background:   'rgba(0,0,0,0.2)',
+        background:   'rgba(0,0,0,0.5)',
         zIndex:       49,
       })
       setOverlayFixedStyle({
