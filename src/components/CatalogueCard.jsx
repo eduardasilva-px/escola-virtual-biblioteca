@@ -54,11 +54,11 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
           }}
         />
 
-        {/* "Adicionado" badge — top-left of cover, replaces the button */}
+        {/* "Na biblioteca" badge — top-left of cover, replaces the button */}
         {isAdded && (
           <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#dcfce7] border border-black/10 pointer-events-none">
             <span className="text-[12px] font-medium leading-4 text-[#166534] whitespace-nowrap">
-              Adicionado
+              Na biblioteca
             </span>
           </div>
         )}
