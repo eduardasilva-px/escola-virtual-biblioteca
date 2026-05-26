@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
@@ -89,7 +89,31 @@ function ModalBookCard({ cover, title, grade }) {
 }
 
 /* ─── modal ────────────────────────────────────────────────────────── */
-export default function NovosProjetosModal({ onClose }) {
+export default function NovosProjetosModal({ onClose, containerRef }) {
+  /* Measure white container so the backdrop + panel stay inside it */
+  const [wrapperStyle, setWrapperStyle] = useState({
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+  })
+
+  useEffect(() => {
+    function compute() {
+      if (!containerRef?.current) return
+      const r = containerRef.current.getBoundingClientRect()
+      setWrapperStyle({
+        position: 'fixed',
+        top:    r.top,
+        left:   r.left,
+        right:  window.innerWidth  - r.right,
+        bottom: window.innerHeight - r.bottom,
+        borderRadius: '16px',
+        overflow: 'hidden',
+      })
+    }
+    compute()
+    window.addEventListener('resize', compute)
+    return () => window.removeEventListener('resize', compute)
+  }, [containerRef])
+
   /* Close on Escape */
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') onClose() }
@@ -97,16 +121,9 @@ export default function NovosProjetosModal({ onClose }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  /* Lock body scroll */
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
-  }, [])
-
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
+    <div style={{ ...wrapperStyle, zIndex: 50 }} className="flex items-center justify-center">
+      {/* Backdrop — covers only the white container */}
       <div
         className="absolute inset-0 bg-[#0a0a0a]/20"
         onClick={onClose}

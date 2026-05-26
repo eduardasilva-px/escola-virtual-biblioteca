@@ -242,6 +242,7 @@ export default function NovosProjetosPage() {
   const searchInputRef = useRef(null)
   const stickyRowRef   = useRef(null)
   const searchBarRef   = useRef(null)
+  const containerRef   = useRef(null)
 
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
@@ -466,6 +467,7 @@ export default function NovosProjetosPage() {
 
         {/* ── White rounded container ── */}
         <div
+          ref={containerRef}
           className="relative flex flex-col isolate overflow-hidden rounded-[16px] w-full h-full"
           style={{
             background: 'var(--background)',
@@ -552,7 +554,7 @@ export default function NovosProjetosPage() {
                 <NovosProjetosBanner onVerTodos={() => setModalOpen(true)} />
               )}
               {modalOpen && (
-                <NovosProjetosModal onClose={() => setModalOpen(false)} />
+                <NovosProjetosModal onClose={() => setModalOpen(false)} containerRef={containerRef} />
               )}
 
               {hasActiveFilters ? (
