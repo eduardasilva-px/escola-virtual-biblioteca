@@ -142,8 +142,8 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
       <div
         className={`relative flex flex-col bg-white rounded-[14px] border border-[#d8d8d7] overflow-hidden pointer-events-auto ${isExiting ? 'modal-panel-exit' : 'modal-panel-enter'}`}
         style={{
-          width: 818,
-          height: 608,
+          width: 'clamp(818px, 60vw, 1100px)',
+          height: 'clamp(608px, 44.5vw, 818px)',
           boxShadow: '0px 8px 32px 0px rgba(0,0,0,0.12), 0px 2px 8px 0px rgba(0,0,0,0.08)',
         }}
         role="dialog"
