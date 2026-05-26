@@ -125,7 +125,7 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
     <div style={{ ...wrapperStyle, zIndex: 50 }} className="flex items-center justify-center">
       {/* Backdrop — covers only the white container */}
       <div
-        className="absolute inset-0 bg-black/50"
+        className="absolute inset-0 bg-black/[0.7]"
         onClick={onClose}
         aria-hidden="true"
       />
