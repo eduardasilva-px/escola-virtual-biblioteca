@@ -54,12 +54,12 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full -mt-2">
 
       {/* ── Scrollable track (scrollbar hidden via CSS class) ── */}
       <div
         ref={trackRef}
-        className="flex items-end overflow-x-auto scrollbar-none"
+        className="flex items-end overflow-x-auto scrollbar-none pt-2"
         style={{ gap: CARD_GAP }}
       >
         {books.map((book) => (
