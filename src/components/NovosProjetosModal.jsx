@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
@@ -90,6 +90,18 @@ function ModalBookCard({ cover, title, grade }) {
 
 /* ─── modal ────────────────────────────────────────────────────────── */
 export default function NovosProjetosModal({ onClose, containerRef }) {
+  /* Exit animation state */
+  const [isExiting, setIsExiting] = useState(false)
+  const exitTimerRef = useRef(null)
+
+  function handleClose() {
+    if (isExiting) return
+    setIsExiting(true)
+    exitTimerRef.current = setTimeout(() => onClose(), 200)
+  }
+
+  useEffect(() => () => clearTimeout(exitTimerRef.current), [])
+
   /* Measure white container so the panel centres within it */
   const [panelAnchor, setPanelAnchor] = useState({ top: 0, left: 0, width: '100%', height: '100%' })
 
@@ -106,17 +118,17 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
 
   /* Close on Escape */
   useEffect(() => {
-    function onKey(e) { if (e.key === 'Escape') onClose() }
+    function onKey(e) { if (e.key === 'Escape') handleClose() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [isExiting]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return createPortal(
     <div className="fixed inset-0" style={{ zIndex: 50 }}>
       {/* Backdrop — full screen */}
       <div
-        className="absolute inset-0 bg-black/[0.7]"
-        onClick={onClose}
+        className={`absolute inset-0 bg-black/[0.7] ${isExiting ? 'modal-backdrop-exit' : 'modal-backdrop-enter'}`}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -128,7 +140,7 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
 
       {/* Panel */}
       <div
-        className="relative flex flex-col bg-white rounded-[14px] border border-[#d8d8d7] overflow-hidden pointer-events-auto"
+        className={`relative flex flex-col bg-white rounded-[14px] border border-[#d8d8d7] overflow-hidden pointer-events-auto ${isExiting ? 'modal-panel-exit' : 'modal-panel-enter'}`}
         style={{
           width: 818,
           height: 608,
@@ -144,7 +156,7 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
             Novos projetos
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Fechar"
             className="absolute right-4 top-4 flex items-center justify-center w-6 h-6 rounded-[4px] text-[#0a0a0a]/70 hover:text-[#0a0a0a] hover:bg-black/5 transition-colors duration-100"
           >
