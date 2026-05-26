@@ -90,24 +90,14 @@ function ModalBookCard({ cover, title, grade }) {
 
 /* ─── modal ────────────────────────────────────────────────────────── */
 export default function NovosProjetosModal({ onClose, containerRef }) {
-  /* Measure white container so the backdrop + panel stay inside it */
-  const [wrapperStyle, setWrapperStyle] = useState({
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-  })
+  /* Measure white container so the panel centres within it */
+  const [panelAnchor, setPanelAnchor] = useState({ top: 0, left: 0, width: '100%', height: '100%' })
 
   useEffect(() => {
     function compute() {
       if (!containerRef?.current) return
       const r = containerRef.current.getBoundingClientRect()
-      setWrapperStyle({
-        position: 'fixed',
-        top:    r.top,
-        left:   r.left,
-        right:  window.innerWidth  - r.right,
-        bottom: window.innerHeight - r.bottom,
-        borderRadius: '16px',
-        overflow: 'hidden',
-      })
+      setPanelAnchor({ top: r.top, left: r.left, width: r.width, height: r.height })
     }
     compute()
     window.addEventListener('resize', compute)
@@ -122,17 +112,23 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
   }, [onClose])
 
   return createPortal(
-    <div style={{ ...wrapperStyle, zIndex: 50 }} className="flex items-center justify-center">
-      {/* Backdrop — covers only the white container */}
+    <div className="fixed inset-0" style={{ zIndex: 50 }}>
+      {/* Backdrop — full screen */}
       <div
         className="absolute inset-0 bg-black/[0.7]"
         onClick={onClose}
         aria-hidden="true"
       />
 
+      {/* Panel anchor — positioned over the white container, centres the panel */}
+      <div
+        className="absolute flex items-center justify-center pointer-events-none"
+        style={panelAnchor}
+      >
+
       {/* Panel */}
       <div
-        className="relative flex flex-col bg-white rounded-[14px] border border-[#d8d8d7] overflow-hidden"
+        className="relative flex flex-col bg-white rounded-[14px] border border-[#d8d8d7] overflow-hidden pointer-events-auto"
         style={{
           width: 818,
           height: 608,
@@ -165,6 +161,7 @@ export default function NovosProjetosModal({ onClose, containerRef }) {
           </div>
         </div>
       </div>
+      </div>{/* end panel anchor */}
     </div>,
     document.body,
   )
