@@ -168,7 +168,7 @@ export default function BookCard({
 
       {/* ── Disciplines tooltip portal ── */}
       {tooltipVisible && disciplines && createPortal(
-        /* Outer div: positioning only — no transform so animation isn't overridden */
+        /* Layer 1 — fixed anchor at title midpoint */
         <div
           style={{
             position: 'fixed',
@@ -178,40 +178,40 @@ export default function BookCard({
             pointerEvents: 'none',
           }}
         >
-          {/* Inner div: translate into place + animate scale/opacity from bottom */}
-          <div
-            className="tooltip-enter"
-            style={{ transform: 'translateX(-50%) translateY(calc(-100% - 6px))' }}
-          >
-            {/* Tooltip box */}
-            <div
-              style={{
-                background: '#2a2a29',
-                borderRadius: 8,
-                padding: '6px 12px',
-                color: 'white',
-                fontSize: 12,
-                lineHeight: '16px',
-                textAlign: 'center',
-                maxWidth: 220,
-                whiteSpace: 'normal',
-                fontFamily: 'var(--font-default)',
-              }}
-            >
-              {disciplines.join(', ')}
+          {/* Layer 2 — translate above the title (separate from animation transform) */}
+          <div style={{ transform: 'translateX(-50%) translateY(calc(-100% - 6px))' }}>
+            {/* Layer 3 — scale + fade animation, origin at bottom so it grows upward */}
+            <div className="tooltip-enter">
+              {/* Tooltip box */}
+              <div
+                style={{
+                  background: '#2a2a29',
+                  borderRadius: 8,
+                  padding: '6px 12px',
+                  color: 'white',
+                  fontSize: 12,
+                  lineHeight: '16px',
+                  textAlign: 'center',
+                  maxWidth: 220,
+                  whiteSpace: 'normal',
+                  fontFamily: 'var(--font-default)',
+                }}
+              >
+                {disciplines.join(', ')}
+              </div>
+              {/* Downward arrow */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: -5,
+                  left: '50%',
+                  transform: 'translateX(-50%) rotate(45deg)',
+                  width: 10,
+                  height: 10,
+                  background: '#2a2a29',
+                }}
+              />
             </div>
-            {/* Downward arrow */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: -5,
-                left: '50%',
-                transform: 'translateX(-50%) rotate(45deg)',
-                width: 10,
-                height: 10,
-                background: '#2a2a29',
-              }}
-            />
           </div>
         </div>,
         document.body,
