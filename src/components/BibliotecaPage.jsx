@@ -46,7 +46,8 @@ import coverMat7       from '../assets/images/book-ciencias-9.jpg'
 import coverRow3a      from '../assets/images/book-espanhol.jpg'
 import coverRow3b      from '../assets/images/book-matematica2.jpg'
 import coverRow3c      from '../assets/images/book-sucesso.jpg'
-import coverHistoriaA11 from '../assets/images/book-historia-a-11.jpg'
+import coverHistoriaA11   from '../assets/images/book-historia-a-11.jpg'
+import coverVariasDisc1  from '../assets/images/book-varias-disciplinas-1ano.jpg'
 
 // ── Catalogue covers — real Figma assets ──
 import catMat1ano     from '../assets/images/cat-mat-1ano.jpg'
@@ -84,7 +85,8 @@ const INITIAL_GRID_BOOKS = [
   { id: 'matematica-9',cover: catMat9ano,     title: 'Matemática',         grade: '9°ano',  pinned: false },
   { id: 'ciencias-7',   cover: coverRow3b,      title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
   { id: 'sucesso-8',    cover: coverRow3c,      title: 'Inglês',            grade: '8°ano',  pinned: false },
-  { id: 'historia-a-11', cover: coverHistoriaA11, title: 'História A',       grade: '11°ano', pinned: false },
+  { id: 'historia-a-11',       cover: coverHistoriaA11,  title: 'História A',        grade: '11°ano', pinned: false },
+  { id: 'varias-disc-1',      cover: coverVariasDisc1,  title: 'Várias Disciplinas', grade: '1°ano',  pinned: false },
 ]
 
 /** IDs of the books that ship in the library — used to seed CATALOGUE badges on first render */
