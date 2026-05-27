@@ -24,13 +24,28 @@ export default function BookCard({
   grade,
   pinned = false,
   width,
+  disciplines,
   onPinToggle,
   onRemove,
 }) {
-  const [menuOpen, setMenuOpen]   = useState(false)
-  const [menuPos,  setMenuPos]    = useState({ top: 0, left: 0 })
-  const menuButtonRef             = useRef(null)
-  const menuPanelRef              = useRef(null)
+  const [menuOpen, setMenuOpen]         = useState(false)
+  const [menuPos,  setMenuPos]          = useState({ top: 0, left: 0 })
+  const menuButtonRef                   = useRef(null)
+  const menuPanelRef                    = useRef(null)
+  const [tooltipVisible, setTooltipVisible] = useState(false)
+  const [tooltipPos, setTooltipPos]     = useState({ top: 0, left: 0 })
+  const titleRef                        = useRef(null)
+
+  function showTooltip() {
+    if (!titleRef.current) return
+    const rect = titleRef.current.getBoundingClientRect()
+    setTooltipPos({ top: rect.top, left: rect.left + rect.width / 2 })
+    setTooltipVisible(true)
+  }
+
+  function hideTooltip() {
+    setTooltipVisible(false)
+  }
 
   function openMenu() {
     const rect = menuButtonRef.current.getBoundingClientRect()
@@ -134,9 +149,12 @@ export default function BookCard({
       {/* ── Metadata ── */}
       <div className="flex flex-col gap-0.5 w-full">
         <p
+          ref={disciplines ? titleRef : null}
           className="text-[13px] font-medium leading-[18px] truncate"
-          style={{ color: 'var(--foreground)' }}
+          style={{ color: 'var(--foreground)', cursor: disciplines ? 'default' : undefined }}
           title={title}
+          onMouseEnter={disciplines ? showTooltip : undefined}
+          onMouseLeave={disciplines ? hideTooltip : undefined}
         >
           {title}
         </p>
@@ -147,6 +165,51 @@ export default function BookCard({
           {grade}
         </p>
       </div>
+
+      {/* ── Disciplines tooltip portal ── */}
+      {tooltipVisible && disciplines && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: tooltipPos.top,
+            left: tooltipPos.left,
+            transform: 'translateX(-50%) translateY(calc(-100% - 6px))',
+            zIndex: 600,
+            pointerEvents: 'none',
+          }}
+        >
+          {/* Tooltip box */}
+          <div
+            style={{
+              background: '#2a2a29',
+              borderRadius: 8,
+              padding: '6px 12px',
+              color: 'white',
+              fontSize: 12,
+              lineHeight: '16px',
+              textAlign: 'center',
+              maxWidth: 220,
+              whiteSpace: 'normal',
+              fontFamily: 'var(--font-default)',
+            }}
+          >
+            {disciplines.join(', ')}
+          </div>
+          {/* Downward arrow */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: -5,
+              left: '50%',
+              transform: 'translateX(-50%) rotate(45deg)',
+              width: 10,
+              height: 10,
+              background: '#2a2a29',
+            }}
+          />
+        </div>,
+        document.body,
+      )}
 
       {/* ── Dropdown portal ── */}
       {menuOpen && createPortal(

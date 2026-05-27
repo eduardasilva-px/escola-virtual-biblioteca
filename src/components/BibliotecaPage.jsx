@@ -86,7 +86,7 @@ const INITIAL_GRID_BOOKS = [
   { id: 'ciencias-7',   cover: coverRow3b,      title: 'Ciências Naturais', grade: '7°ano',  pinned: false },
   { id: 'sucesso-8',    cover: coverRow3c,      title: 'Inglês',            grade: '8°ano',  pinned: false },
   { id: 'historia-a-11',       cover: coverHistoriaA11,  title: 'História A',        grade: '11°ano', pinned: false },
-  { id: 'varias-disc-1',      cover: coverVariasDisc1,  title: 'Várias Disciplinas', grade: '1°ano',  pinned: false },
+  { id: 'varias-disc-1',      cover: coverVariasDisc1,  title: 'Várias Disciplinas', grade: '1°ano',  pinned: false, disciplines: ['Português', 'Matemática', 'Estudo do Meio', 'Cidadania', 'Expressões'] },
 ]
 
 /** IDs of the books that ship in the library — used to seed CATALOGUE badges on first render */
@@ -606,6 +606,7 @@ export default function BibliotecaPage() {
                           title={book.title}
                           grade={book.grade}
                           pinned={false}
+                          disciplines={book.disciplines}
                           onPinToggle={() => handleTogglePin(book)}
                           onRemove={() => handleRemoveRequest(book)}
                         />
