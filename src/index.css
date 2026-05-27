@@ -256,3 +256,22 @@ html, body {
     animation: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────
+   Disciplines tooltip animation
+   Scales up from the bottom (arrow end) + fades.
+───────────────────────────────────────────── */
+
+@keyframes tooltip-in {
+  from { opacity: 0; transform: scale(0.88) translateY(4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+.tooltip-enter {
+  animation: tooltip-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: bottom center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-enter { animation: none !important; }
+}

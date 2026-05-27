@@ -168,45 +168,51 @@ export default function BookCard({
 
       {/* ── Disciplines tooltip portal ── */}
       {tooltipVisible && disciplines && createPortal(
+        /* Outer div: positioning only — no transform so animation isn't overridden */
         <div
           style={{
             position: 'fixed',
             top: tooltipPos.top,
             left: tooltipPos.left,
-            transform: 'translateX(-50%) translateY(calc(-100% - 6px))',
             zIndex: 600,
             pointerEvents: 'none',
           }}
         >
-          {/* Tooltip box */}
+          {/* Inner div: translate into place + animate scale/opacity from bottom */}
           <div
-            style={{
-              background: '#2a2a29',
-              borderRadius: 8,
-              padding: '6px 12px',
-              color: 'white',
-              fontSize: 12,
-              lineHeight: '16px',
-              textAlign: 'center',
-              maxWidth: 220,
-              whiteSpace: 'normal',
-              fontFamily: 'var(--font-default)',
-            }}
+            className="tooltip-enter"
+            style={{ transform: 'translateX(-50%) translateY(calc(-100% - 6px))' }}
           >
-            {disciplines.join(', ')}
+            {/* Tooltip box */}
+            <div
+              style={{
+                background: '#2a2a29',
+                borderRadius: 8,
+                padding: '6px 12px',
+                color: 'white',
+                fontSize: 12,
+                lineHeight: '16px',
+                textAlign: 'center',
+                maxWidth: 220,
+                whiteSpace: 'normal',
+                fontFamily: 'var(--font-default)',
+              }}
+            >
+              {disciplines.join(', ')}
+            </div>
+            {/* Downward arrow */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -5,
+                left: '50%',
+                transform: 'translateX(-50%) rotate(45deg)',
+                width: 10,
+                height: 10,
+                background: '#2a2a29',
+              }}
+            />
           </div>
-          {/* Downward arrow */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -5,
-              left: '50%',
-              transform: 'translateX(-50%) rotate(45deg)',
-              width: 10,
-              height: 10,
-              background: '#2a2a29',
-            }}
-          />
         </div>,
         document.body,
       )}
