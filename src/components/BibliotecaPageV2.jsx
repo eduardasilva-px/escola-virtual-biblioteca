@@ -511,7 +511,7 @@ export default function BibliotecaPageV2() {
                       </p>
                       <div
                         className="grid w-full items-end"
-                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(7, 1fr)' }}
                       >
                         {searchLibraryResults.map((book) => (
                           <BookCard
@@ -542,7 +542,7 @@ export default function BibliotecaPageV2() {
                       </p>
                       <div
                         className="grid w-full items-end"
-                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))' }}
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(7, 1fr)' }}
                       >
                         {searchCatalogueResults.map((book) => (
                           <CatalogueCard
