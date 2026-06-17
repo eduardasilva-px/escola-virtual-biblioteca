@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import BibliotecaPage from './components/BibliotecaPage'
+import BibliotecaPageV2 from './components/BibliotecaPageV2'
 import NovosProjetosPage from './components/NovosProjetosPage'
 import PasswordGate from './components/PasswordGate'
 
@@ -23,6 +24,7 @@ export default function App() {
     }
     if (path === '/novosprojetos') return <NovosProjetosPage />
     if (path === '/biblioteca') return <BibliotecaPage />
+    if (path === '/biblioteca/pesquisav2') return <BibliotecaPageV2 />
     // fallback
     window.history.replaceState(null, '', '/biblioteca')
     return <BibliotecaPage />
