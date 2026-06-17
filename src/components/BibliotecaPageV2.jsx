@@ -505,7 +505,7 @@ export default function BibliotecaPageV2() {
 
                   {/* Section 1 — books already in the library */}
                   {searchLibraryResults.length > 0 && (
-                    <section aria-label="Na biblioteca" className="w-full flex flex-col gap-3">
+                    <section aria-label="Na biblioteca" className="w-full flex flex-col gap-2">
                       <p className="text-[12px] font-medium leading-4 uppercase truncate" style={{ color: '#929291' }}>
                         Na biblioteca
                       </p>
@@ -536,7 +536,7 @@ export default function BibliotecaPageV2() {
 
                   {/* Section 2 — books to add from catalogue */}
                   {searchCatalogueResults.length > 0 && (
-                    <section aria-label="Adicionar à biblioteca" className="w-full flex flex-col gap-3">
+                    <section aria-label="Adicionar à biblioteca" className="w-full flex flex-col gap-2">
                       <p className="text-[12px] font-medium leading-4 uppercase truncate" style={{ color: '#929291' }}>
                         Adicionar à biblioteca
                       </p>
