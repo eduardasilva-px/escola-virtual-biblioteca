@@ -248,82 +248,24 @@ export default function BibliotecaPageV2() {
   /** Overlay is open whenever there's a non-empty query */
   const isOverlayOpen = query.trim().length > 0
 
-  /* ── Delayed unmount — keeps backdrop + dialog in the DOM long enough
-        for their exit animations to finish (180 ms) before React removes them. ── */
-  const [overlayMounted, setOverlayMounted] = useState(false)
-  const unmountTimerRef = useRef(null)
-  useEffect(() => {
-    if (isOverlayOpen) {
-      clearTimeout(unmountTimerRef.current)
-      setOverlayMounted(true)
-    } else {
-      unmountTimerRef.current = setTimeout(() => setOverlayMounted(false), 240)
-    }
-    return () => clearTimeout(unmountTimerRef.current)
-  }, [isOverlayOpen])
+  /* ── Inline search results (v2 interaction — no overlay) ── */
+  const searchLibraryResults = useMemo(() => {
+    if (!isOverlayOpen) return []
+    const norm = (s) => s.normalize('NFC').toLowerCase()
+    const q = norm(debouncedQuery)
+    return [...pinnedBooks, ...gridBooks].filter(
+      (b) => norm(b.title).includes(q) || norm(b.grade).includes(q),
+    )
+  }, [debouncedQuery, isOverlayOpen, pinnedBooks, gridBooks]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** True during the exit animation window (mounted but query gone) */
-  const isExiting = overlayMounted && !isOverlayOpen
-
-  /* ── openCount: increments each time the overlay freshly opens.
-        Used as part of card keys so the stagger animation fires on each new open
-        session without re-animating cards that are already visible from filtering. ── */
-  const [openCount, setOpenCount] = useState(0)
-  useEffect(() => {
-    if (isOverlayOpen) setOpenCount((c) => c + 1)
-  }, [isOverlayOpen])  // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* ── Catalogue search results — filtered from CATALOGUE by debouncedQuery ── */
-  const catalogueResults = useMemo(() => {
-    const norm = (str) => str.normalize('NFC').toLowerCase()
-    if (!debouncedQuery.trim()) return CATALOGUE
+  const searchCatalogueResults = useMemo(() => {
+    if (!isOverlayOpen) return []
+    const norm = (s) => s.normalize('NFC').toLowerCase()
     const q = norm(debouncedQuery)
     return CATALOGUE.filter(
-      (book) => norm(book.title).includes(q) || norm(book.grade).includes(q),
+      (b) => !libraryBookIds.has(b.id) && (norm(b.title).includes(q) || norm(b.grade).includes(q)),
     )
-  }, [debouncedQuery])
-
-  /* ── Overlay + backdrop fixed positions.
-        The portal z-indices are intentionally BELOW the sticky row (z-20) so the
-        search bar always floats above the overlay — one input, never swapped. ── */
-  const [backdropFixedStyle, setBackdropFixedStyle] = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
-  const [overlayFixedStyle,  setOverlayFixedStyle]  = useState({ position: 'fixed', top: -9999, visibility: 'hidden' })
-  const [overlayTopOffset,   setOverlayTopOffset]   = useState(0)
-  useEffect(() => {
-    function compute() {
-      if (!mainRef.current || !stickyRowRef.current || !containerRef.current) return
-      const mainRect      = mainRef.current.getBoundingClientRect()
-      const containerRect = containerRef.current.getBoundingClientRect()
-      const stickyRect    = stickyRowRef.current.getBoundingClientRect()
-      setOverlayTopOffset(stickyRect.height)
-      setBackdropFixedStyle({
-        position:     'fixed',
-        top:          containerRect.top,
-        left:         containerRect.left,
-        right:        window.innerWidth  - containerRect.right,
-        bottom:       window.innerHeight - containerRect.bottom,
-        borderRadius: '16px',
-        background:   'rgba(0,0,0,0.5)',
-        zIndex:       14,
-      })
-      setOverlayFixedStyle({
-        position: 'fixed',
-        top:    mainRect.top    + 8,
-        left:   mainRect.left   + 8,
-        right:  window.innerWidth  - mainRect.right  + 8,
-        bottom: window.innerHeight - mainRect.bottom + 8,
-        zIndex: 15,
-      })
-    }
-    if (overlayMounted) {
-      compute()
-      window.addEventListener('resize', compute)
-      return () => window.removeEventListener('resize', compute)
-    } else {
-      setBackdropFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
-      setOverlayFixedStyle({ position: 'fixed', top: -9999, visibility: 'hidden' })
-    }
-  }, [overlayMounted])
+  }, [debouncedQuery, isOverlayOpen, libraryBookIds]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Debounce: update `debouncedQuery` 250 ms after the user stops typing ── */
   useEffect(() => {
@@ -520,12 +462,12 @@ export default function BibliotecaPageV2() {
                  container's white bg + border show through behind the search bar. ── */}
             <div
               ref={stickyRowRef}
-              className={`sticky top-0 z-[20] relative w-full ${overlayMounted ? '' : 'bg-white'}`}
+              className="sticky top-0 z-[20] relative w-full bg-white"
               style={{ padding: '24px 24px 20px' }}
             >
               {/* AppBanner drop shadow — inside the sticky row (z-20) so it
                   paints above the white background and is always visible */}
-              {showBanner && !overlayMounted && (
+              {showBanner && (
                 <div
                   aria-hidden="true"
                   className="absolute inset-x-0 top-0 pointer-events-none"
@@ -541,7 +483,7 @@ export default function BibliotecaPageV2() {
                 onClear={clearSearch}
                 inputRef={searchInputRef}
                 containerRef={searchBarRef}
-                isOpen={isOverlayOpen}
+                isOpen={false}
                 filters={filters}
                 onFilterToggle={handleFilterToggle}
                 onClearFilters={handleClearFilters}
@@ -550,11 +492,73 @@ export default function BibliotecaPageV2() {
               />
             </div>
 
-            {/* ── Library content — always rendered (visible behind overlay when searching) ── */}
+            {/* ── Main content ── */}
             <div className="flex flex-col gap-6 items-start px-6 pt-0 pb-6 w-full">
 
-              {hasActiveFilters ? (
-                /* ── Filtered view — all matching books in one unified grid, same size ── */
+              {isOverlayOpen ? (
+                /* ── Inline search results (v2) ── */
+                <>
+                  {/* Empty state */}
+                  {searchLibraryResults.length === 0 && searchCatalogueResults.length === 0 && (
+                    <SearchEmptyState query={debouncedQuery} />
+                  )}
+
+                  {/* Section 1 — books already in the library */}
+                  {searchLibraryResults.length > 0 && (
+                    <section aria-label="Na biblioteca" className="w-full flex flex-col gap-3">
+                      <p className="text-[12px] font-medium" style={{ color: 'var(--muted-foreground)' }}>
+                        Na biblioteca
+                      </p>
+                      <div
+                        className="grid w-full items-end"
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
+                      >
+                        {searchLibraryResults.map((book) => (
+                          <BookCard
+                            key={book.id}
+                            cover={book.cover}
+                            title={book.title}
+                            grade={book.grade}
+                            pinned={book.pinned}
+                            disciplines={book.disciplines}
+                            onPinToggle={() => handleTogglePin(book)}
+                            onRemove={() => handleRemoveRequest(book)}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Separator — only shown when both sections have results */}
+                  {searchLibraryResults.length > 0 && searchCatalogueResults.length > 0 && (
+                    <div className="w-full h-px bg-[#d8d8d7] flex-shrink-0" />
+                  )}
+
+                  {/* Section 2 — books to add from catalogue */}
+                  {searchCatalogueResults.length > 0 && (
+                    <section aria-label="Adicionar à biblioteca" className="w-full flex flex-col gap-3">
+                      <p className="text-[12px] font-medium" style={{ color: 'var(--muted-foreground)' }}>
+                        Adicionar à biblioteca
+                      </p>
+                      <div
+                        className="grid w-full items-end"
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))' }}
+                      >
+                        {searchCatalogueResults.map((book) => (
+                          <CatalogueCard
+                            key={book.id}
+                            book={book}
+                            searchQuery={query}
+                            isAdded={libraryBookIds.has(book.id)}
+                            onAdd={handleAdd}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </>
+              ) : hasActiveFilters ? (
+                /* ── Filtered view ── */
                 <section aria-label="Manuais filtrados" className="w-full">
                   {visiblePinnedBooks.length === 0 && visibleGridBooks.length === 0 ? (
                     <FilterEmptyState
@@ -580,8 +584,8 @@ export default function BibliotecaPageV2() {
                   )}
                 </section>
               ) : (
+                /* ── Default library view ── */
                 <>
-                  {/* ── Pinned books — carousel when overflow ── */}
                   <section aria-label="Manuais fixados" className="w-full">
                     <PinnedBooksCarousel
                       books={visiblePinnedBooks}
@@ -590,10 +594,8 @@ export default function BibliotecaPageV2() {
                     />
                   </section>
 
-                  {/* ── Separator ── */}
                   <div className="w-full h-px bg-[#d8d8d7] flex-shrink-0" />
 
-                  {/* ── All books grid — responsive 6–8 columns, bottom-aligned ── */}
                   <section aria-label="Todos os manuais" className="w-full -mt-2">
                     <div
                       className="grid w-full items-end"
@@ -621,88 +623,6 @@ export default function BibliotecaPageV2() {
         </div>
       </div>
     </div>
-
-    {/* ── Search catalogue overlay — floating container above the Biblioteca page.
-         Positioned to cover <main> with 8 px margin on all sides.
-         Contains the expanded search bar + scrollable catalogue results.
-    ─────────────────────────────────────────────────────────────────────── */}
-    {overlayMounted && createPortal(
-      <>
-      {/* Backdrop — covers the full white container */}
-      <div
-        style={backdropFixedStyle}
-        className={isExiting ? 'backdrop-exit' : 'backdrop-enter'}
-      />
-
-      {/* Floating results container */}
-      <div
-        style={overlayFixedStyle}
-        className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
-      >
-        {/* Floating container: border + shadow + rounded corners.
-             The search bar lives in the sticky row (z-20) above this panel (z-15),
-             so we only need the results here. Top padding = sticky row height so
-             the results start below the search bar. */}
-        <div
-          id="catalogue-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Catálogo de manuais"
-          className="flex flex-col h-full rounded-[14px] overflow-hidden"
-          style={{
-            background: 'var(--background)',
-            border:     '1px solid #e5e5e5',
-            boxShadow:  '0px 8px 16px -4px rgba(8,13,22,0.12), 0px 4px 6px -2px rgba(8,12,16,0.08)',
-          }}
-        >
-          {/* Scrollable catalogue results — padded below the floating search bar */}
-          <div
-            className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative"
-            style={{ padding: `${overlayTopOffset + 4}px 16px 120px` }}
-          >
-            {catalogueResults.length === 0 ? (
-              <SearchEmptyState query={debouncedQuery} />
-            ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))',
-                  gap: '24px',
-                  alignItems: 'end',
-                }}
-              >
-                {catalogueResults.map((book, idx) => (
-                  <div
-                    key={`${book.id}-${openCount}`}
-                    className="card-enter"
-                    style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
-                  >
-                    <CatalogueCard
-                      book={book}
-                      searchQuery={query}
-                      isAdded={libraryBookIds.has(book.id)}
-                      onAdd={handleAdd}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Footer fade gradient */}
-          <div
-            aria-hidden="true"
-            className="absolute bottom-0 left-0 right-0 pointer-events-none rounded-b-[14px]"
-            style={{
-              height: '114px',
-              background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,1) 100%)',
-            }}
-          />
-        </div>
-      </div>
-      </>,
-      document.body,
-    )}
 
     {/* ── Toast portal ────────────────────────────────────────────────────
          The aria-live region is always in the DOM so screen readers register
