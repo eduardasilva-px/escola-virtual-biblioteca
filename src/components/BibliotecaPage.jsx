@@ -663,18 +663,11 @@ export default function BibliotecaPage() {
             {catalogueResults.length === 0 ? (
               <SearchEmptyState query={debouncedQuery} />
             ) : (
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))',
-                  gap: '24px',
-                  alignItems: 'end',
-                }}
-              >
+              <div className="grid grid-cols-7 2xl:grid-cols-9 gap-6 items-end">
                 {catalogueResults.map((book, idx) => (
                   <div
                     key={`${book.id}-${openCount}`}
-                    className="card-enter"
+                    className="card-enter min-w-0"
                     style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
                   >
                     <CatalogueCard
