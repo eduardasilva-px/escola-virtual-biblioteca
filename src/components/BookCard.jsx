@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Pin, MoreVertical, Trash2 } from 'lucide-react'
+import { Star, MoreVertical, Trash2 } from 'lucide-react'
+
+const norm = (str) => str.normalize('NFC').toLowerCase()
+
+function splitHighlight(text, query) {
+  if (!query || !query.trim()) return null
+  const idx = norm(text).indexOf(norm(query))
+  if (idx === -1) return null
+  return {
+    before: text.slice(0, idx),
+    match: text.slice(idx, idx + query.length),
+    after: text.slice(idx + query.length),
+  }
+}
 
 /**
  * BookCard
@@ -25,6 +38,7 @@ export default function BookCard({
   pinned = false,
   width,
   disciplines,
+  searchQuery = '',
   onPinToggle,
   onRemove,
 }) {
@@ -82,33 +96,36 @@ export default function BookCard({
       className="relative flex flex-col gap-2 items-start shrink-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer hover:z-[25]"
       style={width ? { width } : undefined}
     >
-      {/* ── Cover image container — height driven by natural image dimensions ── */}
-      <div
-        className="relative rounded-[4px] w-full group transition-transform duration-200 ease-out hover:-translate-y-1.5"
-        style={{ boxShadow: 'var(--shadow-card-cover)' }}
-      >
-        {/* Natural-ratio cover — block + w-full so the div sizes to the image */}
-        <img
-          src={cover}
-          alt={`Capa do livro ${title}`}
-          className="block w-full h-auto rounded-[4px]"
-          draggable={false}
-        />
-
-        {/* Spine gloss overlay — inset-0 tracks the image via the relative container */}
+      {/* ── Cover image container — outer div anchors buttons; inner div lifts on hover ── */}
+      <div className="relative w-full group">
+        {/* Cover + shadow lifts on hover */}
         <div
-          className="absolute inset-0 rounded-[4px] pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(270deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 91.5%, rgba(0,0,0,0.1) 94.1%, rgba(255,255,255,0.16) 94.5%, rgba(0,0,0,0.06) 95.3%, rgba(0,0,0,0.04) 97.4%, rgba(255,255,255,0) 100%)',
-          }}
-        />
+          className="relative rounded-[4px] w-full transition-transform duration-200 ease-out group-hover:-translate-y-1.5"
+          style={{ boxShadow: 'var(--shadow-card-cover)' }}
+        >
+          {/* Natural-ratio cover — block + w-full so the div sizes to the image */}
+          <img
+            src={cover}
+            alt={`Capa do livro ${title}`}
+            className="block w-full h-auto rounded-[4px]"
+            draggable={false}
+          />
 
-        {/* Hover highlight */}
-        <div className="absolute inset-0 rounded-[4px] pointer-events-none bg-white/0 group-hover:bg-white/15 transition-colors duration-200" />
+          {/* Spine gloss overlay */}
+          <div
+            className="absolute inset-0 rounded-[4px] pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(270deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 91.5%, rgba(0,0,0,0.1) 94.1%, rgba(255,255,255,0.16) 94.5%, rgba(0,0,0,0.06) 95.3%, rgba(0,0,0,0.04) 97.4%, rgba(255,255,255,0) 100%)',
+            }}
+          />
 
-        {/* ── Action buttons ── */}
-        {/* Pin — top-right */}
+          {/* Hover highlight */}
+          <div className="absolute inset-0 rounded-[4px] pointer-events-none bg-white/0 group-hover:bg-white/15 transition-colors duration-200" />
+        </div>
+
+        {/* ── Action buttons — stay fixed, do not translate ── */}
+        {/* Star — top-right */}
         <button
           aria-label={pinned ? 'Desafixar livro' : 'Fixar livro'}
           onClick={onPinToggle}
@@ -120,16 +137,15 @@ export default function BookCard({
             pinned ? 'bg-white/90 hover:bg-white' : 'bg-white/80 hover:bg-white',
           ].join(' ')}
         >
-          <Pin
+          <Star
             size={14}
             className={pinned ? 'text-orange-500 fill-orange-500' : 'text-[#535353]'}
             strokeWidth={1.5}
-            style={{ transform: 'rotate(30deg)' }}
             aria-hidden="true"
           />
         </button>
 
-        {/* Three-dot menu — 4 px below the pin button */}
+        {/* Three-dot menu — below the star button */}
         <button
           ref={menuButtonRef}
           aria-label="Mais opções"
@@ -148,16 +164,27 @@ export default function BookCard({
 
       {/* ── Metadata ── */}
       <div className="flex flex-col gap-0.5 w-full">
-        <p
-          ref={disciplines ? titleRef : null}
-          className="text-[13px] font-medium leading-[18px] truncate"
-          style={{ color: 'var(--foreground)', cursor: disciplines ? 'default' : undefined }}
-          title={title}
-          onMouseEnter={disciplines ? showTooltip : undefined}
-          onMouseLeave={disciplines ? hideTooltip : undefined}
-        >
-          {title}
-        </p>
+        {(() => {
+          const highlight = splitHighlight(title, searchQuery)
+          return (
+            <p
+              ref={disciplines ? titleRef : null}
+              className="text-[13px] font-medium leading-[18px] truncate"
+              style={{ color: 'var(--foreground)', cursor: disciplines ? 'default' : undefined }}
+              title={title}
+              onMouseEnter={disciplines ? showTooltip : undefined}
+              onMouseLeave={disciplines ? hideTooltip : undefined}
+            >
+              {highlight ? (
+                <>
+                  {highlight.before && <span className="font-normal text-[#111820]">{highlight.before}</span>}
+                  <span className="font-semibold text-black">{highlight.match}</span>
+                  {highlight.after && <span className="font-normal text-[#111820]">{highlight.after}</span>}
+                </>
+              ) : title}
+            </p>
+          )
+        })()}
         <p
           className="text-[12px] font-normal leading-4 truncate"
           style={{ color: 'var(--muted-foreground)' }}

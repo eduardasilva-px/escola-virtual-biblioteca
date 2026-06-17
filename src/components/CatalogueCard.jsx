@@ -66,18 +66,18 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
         {/* Bottom gradient + "Adicionar" button — hidden once added */}
         {!isAdded && (
           <div
-            className="absolute bottom-0 left-0 right-0 p-1 rounded-b-[4px]"
+            className="absolute bottom-0 left-0 right-0 p-2 rounded-b-[4px]"
             style={{
               background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)',
             }}
           >
             <button
               onClick={() => onAdd(book)}
-              className="flex items-center justify-center gap-1 w-full h-6 bg-white border border-[#e5e5e5] rounded-[8px] hover:bg-gray-50 active:scale-[0.98] transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="flex items-center justify-center gap-1.5 w-full px-[10px] py-2 bg-white/90 backdrop-blur-[6px] rounded-[6px] shadow-[0px_1px_3px_0px_rgba(8,12,16,0.14)] hover:bg-white active:scale-[0.98] transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label={`Adicionar ${book.title} à biblioteca`}
             >
-              <Plus size={12} strokeWidth={2} className="shrink-0 text-[#0a0a0a]" aria-hidden="true" />
-              <span className="text-[12px] font-medium leading-4 text-[#0a0a0a] whitespace-nowrap">
+              <Plus size={14} strokeWidth={2} className="shrink-0 text-[#2a2a29]" aria-hidden="true" />
+              <span className="text-[12px] font-medium leading-none text-[#2a2a29] whitespace-nowrap">
                 Adicionar
               </span>
             </button>

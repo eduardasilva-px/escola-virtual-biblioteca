@@ -521,6 +521,7 @@ export default function BibliotecaPageV2() {
                             grade={book.grade}
                             pinned={book.pinned}
                             disciplines={book.disciplines}
+                            searchQuery={debouncedQuery}
                             onPinToggle={() => handleTogglePin(book)}
                             onRemove={() => handleRemoveRequest(book)}
                           />
