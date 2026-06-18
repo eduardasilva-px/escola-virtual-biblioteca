@@ -252,20 +252,20 @@ export default function BibliotecaPageV2() {
   const searchLibraryResults = useMemo(() => {
     if (!isOverlayOpen) return []
     const norm = (s) => s.normalize('NFC').toLowerCase()
-    const q = norm(debouncedQuery)
+    const q = norm(query)
     return [...pinnedBooks, ...gridBooks].filter(
       (b) => norm(b.title).includes(q) || norm(b.grade).includes(q),
     )
-  }, [debouncedQuery, isOverlayOpen, pinnedBooks, gridBooks]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, isOverlayOpen, pinnedBooks, gridBooks]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const searchCatalogueResults = useMemo(() => {
     if (!isOverlayOpen) return []
     const norm = (s) => s.normalize('NFC').toLowerCase()
-    const q = norm(debouncedQuery)
+    const q = norm(query)
     return CATALOGUE.filter(
       (b) => !libraryBookIds.has(b.id) && (norm(b.title).includes(q) || norm(b.grade).includes(q)),
     )
-  }, [debouncedQuery, isOverlayOpen, libraryBookIds]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, isOverlayOpen, libraryBookIds]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Debounce: update `debouncedQuery` 250 ms after the user stops typing ── */
   useEffect(() => {
@@ -500,7 +500,7 @@ export default function BibliotecaPageV2() {
                 <>
                   {/* Empty state */}
                   {searchLibraryResults.length === 0 && searchCatalogueResults.length === 0 && (
-                    <SearchEmptyState query={debouncedQuery} />
+                    <SearchEmptyState query={query} />
                   )}
 
                   {/* Section 1 — books already in the library */}
@@ -511,20 +511,21 @@ export default function BibliotecaPageV2() {
                       </p>
                       <div
                         className="grid w-full items-end"
-                        style={{ gap: '16px', gridTemplateColumns: 'repeat(7, 1fr)' }}
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
                       >
                         {searchLibraryResults.map((book) => (
-                          <BookCard
-                            key={book.id}
-                            cover={book.cover}
-                            title={book.title}
-                            grade={book.grade}
-                            pinned={book.pinned}
-                            disciplines={book.disciplines}
-                            searchQuery={debouncedQuery}
-                            onPinToggle={() => handleTogglePin(book)}
-                            onRemove={() => handleRemoveRequest(book)}
-                          />
+                          <div key={book.id} className="min-w-0">
+                            <BookCard
+                              cover={book.cover}
+                              title={book.title}
+                              grade={book.grade}
+                              pinned={book.pinned}
+                              disciplines={book.disciplines}
+                              searchQuery={query}
+                              onPinToggle={() => handleTogglePin(book)}
+                              onRemove={() => handleRemoveRequest(book)}
+                            />
+                          </div>
                         ))}
                       </div>
                     </section>
@@ -543,16 +544,17 @@ export default function BibliotecaPageV2() {
                       </p>
                       <div
                         className="grid w-full items-end"
-                        style={{ gap: '16px', gridTemplateColumns: 'repeat(7, 1fr)' }}
+                        style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
                       >
                         {searchCatalogueResults.map((book) => (
-                          <CatalogueCard
-                            key={book.id}
-                            book={book}
-                            searchQuery={query}
-                            isAdded={libraryBookIds.has(book.id)}
-                            onAdd={handleAdd}
-                          />
+                          <div key={book.id} className="min-w-0">
+                            <CatalogueCard
+                              book={book}
+                              searchQuery={query}
+                              isAdded={libraryBookIds.has(book.id)}
+                              onAdd={handleAdd}
+                            />
+                          </div>
                         ))}
                       </div>
                     </section>

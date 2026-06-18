@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import BookCard from './BookCard'
 
-const CARD_WIDTH = 172
-const CARD_GAP   = 16   // gap-4
+const CARD_GAP = 16   // gap-4
+const CARDS_PER_ROW = 7
 
 /**
  * PinnedBooksCarousel
@@ -47,8 +47,10 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
   useEffect(() => { update() }, [books])
 
   function scroll(dir) {
-    trackRef.current?.scrollBy({
-      left: dir * (CARD_WIDTH + CARD_GAP),
+    const el = trackRef.current
+    if (!el) return
+    el.scrollBy({
+      left: dir * ((el.clientWidth + CARD_GAP) / CARDS_PER_ROW),
       behavior: 'smooth',
     })
   }
@@ -63,13 +65,15 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
         style={{ gap: CARD_GAP }}
       >
         {books.map((book) => (
-          <div key={book.id} className="shrink-0">
+          <div
+            key={book.id}
+            style={{ flex: `0 0 calc((100% - ${(CARDS_PER_ROW - 1) * CARD_GAP}px) / ${CARDS_PER_ROW})`, minWidth: 0 }}
+          >
             <BookCard
               cover={book.cover}
               title={book.title}
               grade={book.grade}
               pinned
-              width={CARD_WIDTH}
               onPinToggle={() => onPinToggle(book)}
               onRemove={() => onRemove(book)}
             />

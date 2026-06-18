@@ -273,15 +273,15 @@ export default function BibliotecaPage() {
     if (isOverlayOpen) setOpenCount((c) => c + 1)
   }, [isOverlayOpen])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ── Catalogue search results — filtered from CATALOGUE by debouncedQuery ── */
+  /* ── Catalogue search results — filtered live from query (no debounce needed for local array) ── */
   const catalogueResults = useMemo(() => {
     const norm = (str) => str.normalize('NFC').toLowerCase()
-    if (!debouncedQuery.trim()) return CATALOGUE
-    const q = norm(debouncedQuery)
+    if (!query.trim()) return []
+    const q = norm(query)
     return CATALOGUE.filter(
       (book) => norm(book.title).includes(q) || norm(book.grade).includes(q),
     )
-  }, [debouncedQuery])
+  }, [query])
 
   /* ── Overlay + backdrop fixed positions.
         The portal z-indices are intentionally BELOW the sticky row (z-20) so the
@@ -563,7 +563,7 @@ export default function BibliotecaPage() {
                   ) : (
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(8, 1fr)' }}
                     >
                       {[...visiblePinnedBooks, ...visibleGridBooks].map((book) => (
                         <BookCard
@@ -597,7 +597,7 @@ export default function BibliotecaPage() {
                   <section aria-label="Todos os manuais" className="w-full -mt-2">
                     <div
                       className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))' }}
+                      style={{ gap: '16px', gridTemplateColumns: 'repeat(8, 1fr)' }}
                     >
                       {visibleGridBooks.map((book) => (
                         <BookCard
@@ -661,15 +661,11 @@ export default function BibliotecaPage() {
             style={{ padding: `${overlayTopOffset + 4}px 16px 120px` }}
           >
             {catalogueResults.length === 0 ? (
-              <SearchEmptyState query={debouncedQuery} />
+              <SearchEmptyState query={query} />
             ) : (
               <div className="grid grid-cols-7 2xl:grid-cols-9 gap-6 items-end">
-                {catalogueResults.map((book, idx) => (
-                  <div
-                    key={`${book.id}-${openCount}`}
-                    className="card-enter min-w-0"
-                    style={{ animationDelay: `${Math.min(idx, 7) * 28}ms` }}
-                  >
+                {catalogueResults.map((book) => (
+                  <div key={book.id} className="min-w-0">
                     <CatalogueCard
                       book={book}
                       searchQuery={query}
