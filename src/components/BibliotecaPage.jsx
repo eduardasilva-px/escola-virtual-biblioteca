@@ -245,8 +245,8 @@ export default function BibliotecaPage() {
   const mainRef        = useRef(null)
   const containerRef   = useRef(null)
 
-  /** Overlay is open whenever there's a non-empty query */
-  const isOverlayOpen = query.trim().length > 0
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const isOverlayOpen = isDialogOpen
 
   /* ── Delayed unmount — keeps backdrop + dialog in the DOM long enough
         for their exit animations to finish (180 ms) before React removes them. ── */
@@ -308,7 +308,8 @@ export default function BibliotecaPage() {
       })
       setOverlayFixedStyle({
         position: 'fixed',
-        top:    mainRect.top    + 8,
+        // Extend card up so the 32px heading row + 8px gap sit above the input
+        top:    Math.max(containerRect.top + 8, mainRect.top - 25),
         left:   mainRect.left   + 8,
         right:  window.innerWidth  - mainRect.right  + 8,
         bottom: window.innerHeight - mainRect.bottom + 8,
@@ -335,11 +336,18 @@ export default function BibliotecaPage() {
   useEffect(() => {
     if (!isOverlayOpen) return
     const handler = (e) => {
-      if (e.key === 'Escape') clearSearch()
+      if (e.key === 'Escape') closeDialog()
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [isOverlayOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function closeDialog() {
+    setIsDialogOpen(false)
+    setQuery('')
+    setDebouncedQuery('')
+    searchInputRef.current?.blur()
+  }
 
   function clearSearch() {
     setQuery('')
@@ -521,7 +529,7 @@ export default function BibliotecaPage() {
             <div
               ref={stickyRowRef}
               className={`sticky top-0 z-[20] relative w-full ${overlayMounted ? '' : 'bg-white'}`}
-              style={{ padding: '24px 24px 20px' }}
+              style={{ padding: '24px 24px 20px', ...(overlayMounted ? { pointerEvents: 'none' } : {}) }}
             >
               {/* AppBanner drop shadow — inside the sticky row (z-20) so it
                   paints above the white background and is always visible */}
@@ -539,6 +547,7 @@ export default function BibliotecaPage() {
                 query={query}
                 onQueryChange={setQuery}
                 onClear={clearSearch}
+                onInputFocus={() => setIsDialogOpen(true)}
                 inputRef={searchInputRef}
                 containerRef={searchBarRef}
                 isOpen={isOverlayOpen}
@@ -630,11 +639,15 @@ export default function BibliotecaPage() {
       <div
         style={backdropFixedStyle}
         className={isExiting ? 'backdrop-exit' : 'backdrop-enter'}
+        onClick={closeDialog}
       />
 
       {/* Floating results container */}
       <div
-        style={overlayFixedStyle}
+        style={{
+          ...overlayFixedStyle,
+          ...(query.trim() ? {} : { bottom: 'auto', height: '280px' }),
+        }}
         className={isExiting ? 'search-overlay-exit' : 'search-overlay-enter'}
       >
         {/* Floating container: border + shadow + rounded corners.
@@ -646,19 +659,49 @@ export default function BibliotecaPage() {
           role="dialog"
           aria-modal="true"
           aria-label="Catálogo de manuais"
-          className="flex flex-col h-full rounded-[14px] overflow-hidden"
+          className="relative flex flex-col h-full rounded-[14px] overflow-hidden"
           style={{
             background: 'var(--background)',
             border:     '1px solid #e5e5e5',
             boxShadow:  '0px 8px 16px -4px rgba(8,13,22,0.12), 0px 4px 6px -2px rgba(8,12,16,0.08)',
           }}
         >
+          {/* Heading row — absolutely positioned so it doesn't push the input down */}
+          <div
+            className="absolute left-0 right-0 flex items-center justify-between z-10"
+            style={{ top: 8, height: 32, padding: '0 15px' }}
+          >
+            <h2 style={{ fontSize: 16, fontWeight: 400, color: '#3A4452', lineHeight: 1 }}>
+              Pesquisar e adicionar livros
+            </h2>
+            <button
+              type="button"
+              onClick={closeDialog}
+              className="text-[14px] font-medium leading-none shrink-0"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Fechar
+            </button>
+          </div>
+          {/* White mask — covers the heading/input area so books don't show through on scroll */}
+          <div
+            aria-hidden="true"
+            className="absolute left-0 right-0 top-0 pointer-events-none z-[5]"
+            style={{ height: overlayTopOffset + 16, background: 'var(--background)' }}
+          />
+
           {/* Scrollable catalogue results — padded below the floating search bar */}
           <div
             className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 relative"
-            style={{ padding: `${overlayTopOffset + 4}px 16px 120px` }}
+            style={{ padding: `${overlayTopOffset + 16}px 16px ${query.trim() ? '120px' : '24px'}` }}
           >
-            {catalogueResults.length === 0 ? (
+            {!query.trim() ? (
+              <div className="flex items-center justify-center h-full text-center px-6">
+                <p className="text-[14px] font-normal leading-5 text-[#737373] whitespace-nowrap">
+                  Pesquise e adicione todos os livros dentro do seu catálogo completo
+                </p>
+              </div>
+            ) : catalogueResults.length === 0 ? (
               <SearchEmptyState query={query} />
             ) : (
               <div className="grid grid-cols-7 2xl:grid-cols-9 gap-6 items-end">
@@ -676,15 +719,17 @@ export default function BibliotecaPage() {
             )}
           </div>
 
-          {/* Footer fade gradient */}
-          <div
-            aria-hidden="true"
-            className="absolute bottom-0 left-0 right-0 pointer-events-none rounded-b-[14px]"
-            style={{
-              height: '114px',
-              background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,1) 100%)',
-            }}
-          />
+          {/* Footer fade gradient — only shown when results are visible */}
+          {query.trim() && (
+            <div
+              aria-hidden="true"
+              className="absolute bottom-0 left-0 right-0 pointer-events-none rounded-b-[14px]"
+              style={{
+                height: '114px',
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,1) 100%)',
+              }}
+            />
+          )}
         </div>
       </div>
       </>,

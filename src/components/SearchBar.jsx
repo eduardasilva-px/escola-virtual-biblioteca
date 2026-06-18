@@ -22,6 +22,7 @@ export default function SearchBar({
   query = '',
   onQueryChange,
   onClear,
+  onInputFocus,
   inputRef,
   containerRef,
   isOpen = false,
@@ -35,7 +36,7 @@ export default function SearchBar({
   const isActive = isFocused || isOpen
 
   return (
-    <div ref={containerRef} className="relative shrink-0 w-full">
+    <div ref={containerRef} className="relative shrink-0 w-full pointer-events-auto">
       <div className="flex gap-3 items-center w-full">
 
         {/* Search input — animates width when the catalogue overlay opens/closes */}
@@ -73,7 +74,7 @@ export default function SearchBar({
                   type="text"
                   value={query}
                   onChange={(e) => onQueryChange(e.target.value)}
-                  onFocus={() => setIsFocused(true)}
+                  onFocus={() => { setIsFocused(true); onInputFocus?.() }}
                   onBlur={() => setIsFocused(false)}
                   placeholder={isActive ? '' : 'Explorar catálogo e adicionar livros'}
                   autoComplete="off"
