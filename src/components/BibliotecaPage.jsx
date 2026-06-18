@@ -562,8 +562,7 @@ export default function BibliotecaPage() {
                     />
                   ) : (
                     <div
-                      className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(8, 1fr)' }}
+                      className="grid w-full items-end gap-4 grid-cols-7 2xl:grid-cols-8 min-[1920px]:grid-cols-9"
                     >
                       {[...visiblePinnedBooks, ...visibleGridBooks].map((book) => (
                         <BookCard
@@ -596,8 +595,7 @@ export default function BibliotecaPage() {
                   {/* ── All books grid — responsive 6–8 columns, bottom-aligned ── */}
                   <section aria-label="Todos os manuais" className="w-full -mt-2">
                     <div
-                      className="grid w-full items-end"
-                      style={{ gap: '16px', gridTemplateColumns: 'repeat(8, 1fr)' }}
+                      className="grid w-full items-end gap-4 grid-cols-7 2xl:grid-cols-8 min-[1920px]:grid-cols-9"
                     >
                       {visibleGridBooks.map((book) => (
                         <BookCard

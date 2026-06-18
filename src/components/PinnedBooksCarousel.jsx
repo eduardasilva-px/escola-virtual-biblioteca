@@ -2,8 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import BookCard from './BookCard'
 
-const CARD_GAP = 16   // gap-4
-const CARDS_PER_ROW = 7
+const CARD_GAP = 16
+
+// Number of cards visible per row based on track width
+function getCardsPerRow(trackWidth) {
+  if (trackWidth >= 1700) return 8
+  if (trackWidth >= 1400) return 7
+  if (trackWidth >= 1100) return 6
+  return 5
+}
 
 /**
  * PinnedBooksCarousel
@@ -19,14 +26,16 @@ const CARDS_PER_ROW = 7
  */
 export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
   const trackRef = useRef(null)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd,   setAtEnd]   = useState(true)
+  const [atStart,     setAtStart]     = useState(true)
+  const [atEnd,       setAtEnd]       = useState(true)
+  const [cardsPerRow, setCardsPerRow] = useState(6)
 
   function update() {
     const el = trackRef.current
     if (!el) return
     setAtStart(el.scrollLeft <= 2)
     setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 2)
+    setCardsPerRow(getCardsPerRow(el.clientWidth))
   }
 
   /* Set up scroll + resize listeners */
@@ -50,10 +59,12 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
     const el = trackRef.current
     if (!el) return
     el.scrollBy({
-      left: dir * ((el.clientWidth + CARD_GAP) / CARDS_PER_ROW),
+      left: dir * ((el.clientWidth + CARD_GAP) / cardsPerRow),
       behavior: 'smooth',
     })
   }
+
+  const cardFlex = `0 0 calc((100% - ${(cardsPerRow - 1) * CARD_GAP}px) / ${cardsPerRow})`
 
   return (
     <div className="relative w-full -mt-2">
@@ -65,10 +76,7 @@ export default function PinnedBooksCarousel({ books, onPinToggle, onRemove }) {
         style={{ gap: CARD_GAP }}
       >
         {books.map((book) => (
-          <div
-            key={book.id}
-            style={{ flex: `0 0 calc((100% - ${(CARDS_PER_ROW - 1) * CARD_GAP}px) / ${CARDS_PER_ROW})`, minWidth: 0 }}
-          >
+          <div key={book.id} style={{ flex: cardFlex, minWidth: 0 }}>
             <BookCard
               cover={book.cover}
               title={book.title}
