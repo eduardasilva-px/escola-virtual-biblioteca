@@ -98,24 +98,24 @@ html, body {
 
 /* ─────────────────────────────────────────────
    Catalogue card add-to-library transition
-   Exit:  scale + fade out over 200ms
-   Enter: scale + fade in  over 300ms (spring-out)
+   Exit:  scale + fade out over 260ms (ease-in-out)
+   Enter: scale + fade in  over 420ms (gentle spring)
 ───────────────────────────────────────────── */
 
 @keyframes catalogue-card-exit {
-  from { opacity: 1; transform: scale(1);   }
-  to   { opacity: 0; transform: scale(0.75); }
+  from { opacity: 1; transform: scale(1);    }
+  to   { opacity: 0; transform: scale(0.85); }
 }
 @keyframes catalogue-card-enter {
-  from { opacity: 0; transform: scale(0.75); }
-  to   { opacity: 1; transform: scale(1);   }
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1);    }
 }
 
 .catalogue-card-exiting {
-  animation: catalogue-card-exit 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  animation: catalogue-card-exit 260ms cubic-bezier(0.4, 0, 0.6, 1) both;
 }
 .catalogue-card-entering {
-  animation: catalogue-card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: catalogue-card-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ── Honour reduced-motion preference ── */

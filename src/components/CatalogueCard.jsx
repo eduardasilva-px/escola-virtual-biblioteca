@@ -41,8 +41,8 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
     timerRef.current = setTimeout(() => {
       onAdd(book)
       setPhase('entering')
-      timerRef.current = setTimeout(() => setPhase('idle'), 280)
-    }, 220)
+      timerRef.current = setTimeout(() => setPhase('idle'), 420)
+    }, 260)
   }
 
   useEffect(() => () => clearTimeout(timerRef.current), [])

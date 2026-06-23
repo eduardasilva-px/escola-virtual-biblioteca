@@ -360,7 +360,7 @@ export default function BibliotecaPageV2() {
     setGridBooks((prev) => [{ ...book, pinned: false }, ...prev])
     setJustAddedId(book.id)
     clearTimeout(justAddedTimerRef.current)
-    justAddedTimerRef.current = setTimeout(() => setJustAddedId(null), 280)
+    justAddedTimerRef.current = setTimeout(() => setJustAddedId(null), 420)
     showToast(book)
   }
 
