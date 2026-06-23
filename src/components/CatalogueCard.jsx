@@ -105,13 +105,6 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
           </div>
         )}
 
-        {/* White overlay — fades out during entry so scale is the dominant visual */}
-        {phase === 'entering' && (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 rounded-[4px] pointer-events-none bg-white catalogue-card-overlay"
-          />
-        )}
       </div>
 
       {/* ── Metadata ── */}

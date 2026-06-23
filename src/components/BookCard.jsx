@@ -99,13 +99,6 @@ export default function BookCard({
     >
       {/* ── Cover image container — outer div anchors buttons; inner div lifts on hover ── */}
       <div className="relative w-full group">
-        {/* Entry white overlay — fades out during add animation so scale is dominant */}
-        {justAdded && (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 rounded-[4px] pointer-events-none bg-white catalogue-card-overlay z-10"
-          />
-        )}
         {/* Cover + shadow lifts on hover */}
         <div
           className="relative rounded-[4px] w-full transition-transform duration-200 ease-out group-hover:-translate-y-1.5"
