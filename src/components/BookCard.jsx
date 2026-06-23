@@ -39,6 +39,7 @@ export default function BookCard({
   width,
   disciplines,
   searchQuery = '',
+  justAdded = false,
   onPinToggle,
   onRemove,
 }) {
@@ -93,11 +94,18 @@ export default function BookCard({
 
   return (
     <article
-      className="relative flex flex-col gap-2 items-start min-w-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer hover:z-[25]"
-      style={width ? { width } : undefined}
+      className={`relative flex flex-col gap-2 items-start min-w-0 drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] cursor-pointer hover:z-[25]${justAdded ? ' catalogue-card-entering' : ''}`}
+      style={{ ...(width ? { width } : {}), ...(justAdded ? { transformOrigin: 'center bottom' } : {}) }}
     >
       {/* ── Cover image container — outer div anchors buttons; inner div lifts on hover ── */}
       <div className="relative w-full group">
+        {/* Entry white overlay — fades out during add animation so scale is dominant */}
+        {justAdded && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[4px] pointer-events-none bg-white catalogue-card-overlay z-10"
+          />
+        )}
         {/* Cover + shadow lifts on hover */}
         <div
           className="relative rounded-[4px] w-full transition-transform duration-200 ease-out group-hover:-translate-y-1.5"

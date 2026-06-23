@@ -351,10 +351,16 @@ export default function BibliotecaPageV2() {
     }
   }
 
+  const [justAddedId, setJustAddedId] = useState(null)
+  const justAddedTimerRef = useRef(null)
+
   function handleAdd(book) {
     // Guard: already in the library
     if (libraryBookIds.has(book.id)) return
     setGridBooks((prev) => [{ ...book, pinned: false }, ...prev])
+    setJustAddedId(book.id)
+    clearTimeout(justAddedTimerRef.current)
+    justAddedTimerRef.current = setTimeout(() => setJustAddedId(null), 280)
     showToast(book)
   }
 
@@ -396,8 +402,11 @@ export default function BibliotecaPageV2() {
     showToast(book, 'removed')
   }
 
-  // Clean up dialog exit timer on unmount
-  useEffect(() => () => clearTimeout(dialogExitTimerRef.current), [])
+  // Clean up timers on unmount
+  useEffect(() => () => {
+    clearTimeout(dialogExitTimerRef.current)
+    clearTimeout(justAddedTimerRef.current)
+  }, [])
 
   return (
     <>
@@ -522,6 +531,7 @@ export default function BibliotecaPageV2() {
                               pinned={book.pinned}
                               disciplines={book.disciplines}
                               searchQuery={query}
+                              justAdded={justAddedId === book.id}
                               onPinToggle={() => handleTogglePin(book)}
                               onRemove={() => handleRemoveRequest(book)}
                             />

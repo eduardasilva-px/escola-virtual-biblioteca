@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 
 /**
@@ -31,8 +32,28 @@ function splitHighlight(text, query) {
 export default function CatalogueCard({ book, searchQuery = '', isAdded = false, onAdd }) {
   const highlight = splitHighlight(book.title, searchQuery)
 
+  const [phase, setPhase] = useState('idle') // 'idle' | 'exiting' | 'entering'
+  const timerRef = useRef(null)
+
+  function handleAddClick() {
+    if (isAdded || phase !== 'idle') return
+    setPhase('exiting')
+    timerRef.current = setTimeout(() => {
+      onAdd(book)
+      setPhase('entering')
+      timerRef.current = setTimeout(() => setPhase('idle'), 280)
+    }, 220)
+  }
+
+  useEffect(() => () => clearTimeout(timerRef.current), [])
+
+  const animClass = phase === 'exiting' ? 'catalogue-card-exiting' : phase === 'entering' ? 'catalogue-card-entering' : ''
+
   return (
-    <article className="flex flex-col gap-2 items-start drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] justify-end min-w-0 w-full">
+    <article
+      className={`flex flex-col gap-2 items-start drop-shadow-[0px_1px_1px_rgba(0,0,0,0.05)] justify-end min-w-0 w-full ${animClass}`}
+      style={{ transformOrigin: 'center bottom' }}
+    >
 
       {/* ── Cover container ── */}
       <div className="relative rounded-[4px] w-full">
@@ -72,7 +93,7 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
             }}
           >
             <button
-              onClick={() => onAdd(book)}
+              onClick={handleAddClick}
               className="flex items-center justify-center gap-1.5 w-full px-[10px] py-2 bg-white/90 backdrop-blur-[6px] rounded-[6px] shadow-[0px_1px_3px_0px_rgba(8,12,16,0.14)] hover:bg-white active:scale-[0.98] transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label={`Adicionar ${book.title} à biblioteca`}
             >
@@ -82,6 +103,14 @@ export default function CatalogueCard({ book, searchQuery = '', isAdded = false,
               </span>
             </button>
           </div>
+        )}
+
+        {/* White overlay — fades out during entry so scale is the dominant visual */}
+        {phase === 'entering' && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 rounded-[4px] pointer-events-none bg-white catalogue-card-overlay"
+          />
         )}
       </div>
 
